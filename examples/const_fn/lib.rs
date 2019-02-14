@@ -30,5 +30,5 @@ pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
     function.attrs.push(parse_quote!(#[cfg(not(#args))]));
     const_function.attrs.push(parse_quote!(#[cfg(#args)]));
 
-    quote!(#function, #const_function).into()
+    quote!(#function #const_function).into()
 }
