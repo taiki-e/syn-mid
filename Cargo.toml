@@ -1,0 +1,37 @@
+[package]
+name = "syn-mid"
+# NB: When modifying, also modify html_root_url in lib.rs
+version = "0.1.0"
+authors = ["Taiki Endo <te316e89@gmail.com>"]
+license = "Apache-2.0/MIT"
+description = "Providing the features between \"full\" and \"derive\" of syn."
+repository = "https://github.com/taiki-e/syn-mid"
+documentation = "https://docs.rs/syn-mid/"
+readme = "README.md"
+keywords = ["syn", "macros"]
+categories = ["development-tools::procedural-macro-helpers"]
+exclude = ["/.travis.yml"]
+
+[workspace]
+members = ["examples/const_fn", "examples/const_fn_test"]
+
+[dependencies]
+proc-macro2 = "0.4.4" # https://github.com/dtolnay/syn/blob/master/Cargo.toml
+quote = "0.6" # https://github.com/dtolnay/syn/blob/master/Cargo.toml
+
+[dependencies.syn]
+version = "0.15.22"
+default-features = false
+features = ["parsing", "printing", "proc-macro"]
+
+[dev-dependencies]
+quote = "0.6.8"
+
+[features]
+default = ["derive", "clone-impls"]
+
+derive = ["syn/derive"]
+full = ["syn/full"]
+
+clone-impls = ["syn/clone-impls"]
+extra-traits = ["syn/extra-traits"]

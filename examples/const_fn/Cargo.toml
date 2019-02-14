@@ -1,0 +1,15 @@
+[package]
+name = "const_fn"
+version = "0.0.0"
+authors = ["Taiki Endo <te316e89@gmail.com>"]
+publish = false
+
+[lib]
+proc-macro = true
+path = "lib.rs"
+
+[dependencies]
+proc-macro2 = "0.4.4"
+quote = "0.6.8"
+syn = "0.15.22"
+syn-mid = { version = "0.1.0", path = "../.." }
