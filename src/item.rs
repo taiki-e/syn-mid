@@ -1,18 +1,10 @@
-#[cfg(not(feature = "full"))]
 use syn::punctuated::Punctuated;
-#[cfg(not(feature = "full"))]
 use syn::{token, Generics, Lifetime, ReturnType, Type};
 
-#[cfg(not(feature = "full"))]
 use super::*;
 
-#[cfg(feature = "full")]
-pub use syn::FnDecl;
-#[cfg(not(feature = "full"))]
 ast_struct! {
     /// Header of a function declaration, without including the body.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct FnDecl {
         pub fn_token: Token![fn],
         pub generics: Generics,
@@ -23,13 +15,8 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "full")]
-pub use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg};
-#[cfg(not(feature = "full"))]
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -39,8 +26,6 @@ ast_enum_of_structs! {
     pub enum FnArg {
         /// Self captured by reference in a function signature: `&self` or `&mut
         /// self`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub SelfRef(ArgSelfRef {
             pub and_token: Token![&],
             pub lifetime: Option<Lifetime>,
@@ -50,16 +35,12 @@ ast_enum_of_structs! {
 
         /// Self captured by value in a function signature: `self` or `mut
         /// self`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub SelfValue(ArgSelf {
             pub mutability: Option<Token![mut]>,
             pub self_token: Token![self],
         }),
 
         /// An explicitly typed pattern captured by a function signature.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Captured(ArgCaptured {
             pub pat: Pat,
             pub colon_token: Token![:],
@@ -73,7 +54,6 @@ ast_enum_of_structs! {
     }
 }
 
-#[cfg(not(feature = "full"))]
 mod parsing {
     use syn::parse::{Parse, ParseStream, Result};
 
@@ -135,7 +115,6 @@ mod parsing {
     }
 }
 
-#[cfg(not(feature = "full"))]
 mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;

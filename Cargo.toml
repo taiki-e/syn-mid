@@ -22,13 +22,10 @@ quote = "0.6"
 [dependencies.syn]
 version = "0.15.22"
 default-features = false
-features = ["parsing", "printing", "proc-macro"]
+features = ["parsing", "printing", "proc-macro", "derive"]
 
 [features]
-default = ["derive", "clone-impls"]
-
-derive = ["syn/derive"]
-full = ["syn/full"]
+default = ["clone-impls"]
 
 clone-impls = ["syn/clone-impls"]
 extra-traits = ["syn/extra-traits"]
