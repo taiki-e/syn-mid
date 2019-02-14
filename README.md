@@ -24,9 +24,7 @@ This crate provides the following two unique data structures.
   ^     ^
   ```
 
-Other data structures are the same as data structures of [syn]. Also, if the "full" feature is enabled, those items are reexported from [syn].
-
-Note that if you use [syn] with "full" feature and use syn-mid without "full" feature at the same time, errors due to type mismatch may occur.
+Other data structures are the same as data structures of [syn]. These are defined in this crate because they cannot be used in [syn] without "full" feature.
 
 [syn]: https://github.com/dtolnay/syn
 
@@ -49,16 +47,10 @@ The current version of syn-mid requires Rust 1.15 or later.
 
 syn-mid in the default features aims to provide the features between "full" and "derive" of [syn].
 
-* **`derive`** *(enabled by default)* — Data structures for representing the
-  possible input to a custom derive, including structs and enums and types.
-* **`full`** — Data structures for representing the syntax tree of all valid
-  Rust source code, including items and expressions.
 * **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
   types.
 * **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
   types.
-
-Note that if both "derive" and "full" features are disabled, a compile error occurs.
 
 ## License
 

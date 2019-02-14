@@ -16,28 +16,18 @@
 //!   ^     ^
 //!   ```
 //!
-//! Other data structures are the same as data structures of [syn]. Also, if
-//! the "full" feature is enabled, those items are reexported from [syn].
-//!
-//! Note that if you use [syn] with "full" feature and use syn-mid without
-//! "full" feature at the same time, errors due to type mismatch may occur.
+//! Other data structures are the same as data structures of [syn]. These are defined in this crate
+//! because they cannot be used in [syn] without "full" feature.
 //!
 //! ## Optional features
 //!
 //! syn-mid in the default features aims to provide the features between "full"
 //! and "derive" of [syn].
 //!
-//! * **`derive`** *(enabled by default)* — Data structures for representing the
-//!   possible input to a custom derive, including structs and enums and types.
-//! * **`full`** — Data structures for representing the syntax tree of all valid
-//!   Rust source code, including items and expressions.
 //! * **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
 //!   types.
 //! * **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
 //!   types.
-//!
-//! Note that if both "derive" and "full" features are disabled, a compile error
-//! occurs.
 //!
 //! [`syn_mid::ItemFn`]: struct.ItemFn.html
 //! [`syn_mid::Block`]: struct.Block.html
@@ -58,9 +48,6 @@
     )
 )]
 
-#[cfg(not(any(feature = "full", feature = "derive")))]
-compile_error!("To use this crate you need to enable \"derive\" or \"full\" feature");
-
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
 extern crate proc_macro2;
@@ -74,9 +61,7 @@ mod macros;
 
 mod expr;
 mod item;
-#[cfg(not(feature = "full"))]
 mod path;
-#[cfg(not(feature = "full"))]
 mod print;
 #[cfg(feature = "extra-traits")]
 mod tt;
@@ -85,7 +70,6 @@ pub use self::expr::*;
 pub use self::item::*;
 
 use proc_macro2::TokenStream;
-#[cfg(not(feature = "full"))]
 use syn::punctuated::Punctuated;
 use syn::{token, Abi, AttrStyle, Attribute, Ident, Visibility};
 
@@ -145,7 +129,7 @@ mod parsing {
     use syn::parse::{Parse, ParseStream, Result};
     use syn::{Abi, Attribute, Generics, Ident, ReturnType, Visibility, WhereClause};
 
-    use super::*;
+    use super::{Block, FnArg, FnDecl, ItemFn};
 
     fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
         let mut attrs = outer;
@@ -290,78 +274,4 @@ mod printing {
             self.0.generics.where_clause.to_tokens(tokens);
         }
     }
-}
-
-#[cfg(feature = "full")]
-mod convert {
-    use quote::ToTokens;
-    use syn;
-    use syn::parse::{Parse, ParseStream, Result};
-
-    use super::*;
-
-    struct Parser(Vec<syn::Stmt>);
-
-    impl Parse for Parser {
-        fn parse(input: ParseStream) -> Result<Self> {
-            input.call(syn::Block::parse_within).map(Parser)
-        }
-    }
-
-    impl Into<syn::Block> for Block {
-        fn into(self) -> syn::Block {
-            syn::Block {
-                brace_token: self.brace_token,
-                stmts: syn::parse2::<Parser>(self.stmts)
-                    .unwrap_or_else(|err| panic!("{}", err)) // https://github.com/dtolnay/syn/blob/0.15.26/src/parse_quote.rs#L102
-                    .0,
-            }
-        }
-    }
-
-    impl From<syn::Block> for Block {
-        fn from(other: ::syn::Block) -> Block {
-            Block {
-                brace_token: other.brace_token,
-                stmts: other
-                    .stmts
-                    .into_iter()
-                    .map(ToTokens::into_token_stream)
-                    .collect(),
-            }
-        }
-    }
-
-    impl Into<syn::ItemFn> for ItemFn {
-        fn into(self) -> ::syn::ItemFn {
-            syn::ItemFn {
-                attrs: self.attrs,
-                vis: self.vis,
-                constness: self.constness,
-                unsafety: self.unsafety,
-                asyncness: self.asyncness,
-                abi: self.abi,
-                ident: self.ident,
-                decl: self.decl,
-                block: Box::new(self.block.into()),
-            }
-        }
-    }
-
-    impl From<syn::ItemFn> for ItemFn {
-        fn from(other: ::syn::ItemFn) -> ItemFn {
-            ItemFn {
-                attrs: other.attrs,
-                vis: other.vis,
-                constness: other.constness,
-                unsafety: other.unsafety,
-                asyncness: other.asyncness,
-                abi: other.abi,
-                ident: other.ident,
-                decl: other.decl,
-                block: (*other.block).into(),
-            }
-        }
-    }
-
 }

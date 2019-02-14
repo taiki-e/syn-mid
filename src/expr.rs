@@ -1,26 +1,15 @@
-#[cfg(not(feature = "full"))]
 use proc_macro2::TokenStream;
-#[cfg(not(feature = "full"))]
 use syn::punctuated::Punctuated;
-#[cfg(not(feature = "full"))]
 use syn::{token, Attribute, Expr, Ident, Macro, Member, Path, QSelf};
 
-#[cfg(all(not(feature = "full"), feature = "extra-traits"))]
+#[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(all(not(feature = "full"), feature = "extra-traits"))]
+#[cfg(feature = "extra-traits")]
 use tt::TokenStreamHelper;
 
-#[cfg(feature = "full")]
-pub use syn::{
-    Pat, PatIdent, PatLit, PatMacro, PatPath, PatRange, PatRef, PatSlice, PatStruct, PatTuple,
-    PatTupleStruct, PatVerbatim, PatWild,
-};
-#[cfg(not(feature = "full"))]
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
     /// various other places.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -29,15 +18,11 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Pat {
         /// A pattern that matches any value: `_`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Wild(PatWild {
             pub underscore_token: Token![_],
         }),
 
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Ident(PatIdent {
             pub by_ref: Option<Token![ref]>,
             pub mutability: Option<Token![mut]>,
@@ -46,8 +31,6 @@ ast_enum_of_structs! {
         }),
 
         /// A struct or struct variant pattern: `Variant { x, y, .. }`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Struct(PatStruct {
             pub path: Path,
             pub brace_token: token::Brace,
@@ -56,8 +39,6 @@ ast_enum_of_structs! {
         }),
 
         /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub TupleStruct(PatTupleStruct {
             pub path: Path,
             pub pat: PatTuple,
@@ -70,16 +51,12 @@ ast_enum_of_structs! {
         /// constants or associated constants. Qualified path patterns like
         /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
         /// associated constants.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Path(PatPath {
             pub qself: Option<QSelf>,
             pub path: Path,
         }),
 
         /// A tuple pattern: `(a, b)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Tuple(PatTuple {
             pub paren_token: token::Paren,
             pub front: Punctuated<Pat, Token![,]>,
@@ -89,16 +66,12 @@ ast_enum_of_structs! {
         }),
 
         /// A box pattern: `box v`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Box(PatBox {
             pub box_token: Token![box],
             pub pat: Box<Pat>,
         }),
 
         /// A reference pattern: `&mut (first, second)`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Ref(PatRef {
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
@@ -109,15 +82,11 @@ ast_enum_of_structs! {
         ///
         /// This holds an `Expr` rather than a `Lit` because negative numbers
         /// are represented as an `Expr::Unary`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Lit(PatLit {
             pub expr: Box<Expr>,
         }),
 
         /// A range pattern: `1..=2`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Range(PatRange {
             pub lo: Box<Expr>,
             pub limits: RangeLimits,
@@ -125,8 +94,6 @@ ast_enum_of_structs! {
         }),
 
         /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Slice(PatSlice {
             pub bracket_token: token::Bracket,
             pub front: Punctuated<Pat, Token![,]>,
@@ -137,32 +104,28 @@ ast_enum_of_structs! {
         }),
 
         /// A macro in expression position.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Macro(PatMacro {
             pub mac: Macro,
         }),
 
         /// Tokens in pattern position not interpreted by Syn.
-        ///
-        /// *This type is available if Syn is built with the `"full"` feature.*
         pub Verbatim(PatVerbatim #manual_extra_traits {
             pub tts: TokenStream,
         }),
     }
 }
 
-#[cfg(all(not(feature = "full"), feature = "extra-traits"))]
+#[cfg(feature = "extra-traits")]
 impl Eq for PatVerbatim {}
 
-#[cfg(all(not(feature = "full"), feature = "extra-traits"))]
+#[cfg(feature = "extra-traits")]
 impl PartialEq for PatVerbatim {
     fn eq(&self, other: &Self) -> bool {
         TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
     }
 }
 
-#[cfg(all(not(feature = "full"), feature = "extra-traits"))]
+#[cfg(feature = "extra-traits")]
 impl Hash for PatVerbatim {
     fn hash<H>(&self, state: &mut H)
     where
@@ -172,13 +135,8 @@ impl Hash for PatVerbatim {
     }
 }
 
-#[cfg(feature = "full")]
-pub use syn::RangeLimits;
-#[cfg(not(feature = "full"))]
 ast_enum! {
     /// Limit types of a range, inclusive or exclusive.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
     #[cfg_attr(feature = "clone-impls", derive(Copy))]
     pub enum RangeLimits {
         /// Inclusive at the beginning, exclusive at the end.
@@ -188,16 +146,11 @@ ast_enum! {
     }
 }
 
-#[cfg(feature = "full")]
-pub use syn::FieldPat;
-#[cfg(not(feature = "full"))]
 ast_struct! {
     /// A single field in a struct pattern.
     ///
     /// Patterns like the fields of Foo `{ x, ref y, ref mut z }` are treated
     /// the same as `x: x, y: ref y, z: ref mut z` but there is no colon token.
-    ///
-    /// *This type is available if Syn is built with the `"full"` feature.*
     pub struct FieldPat {
         pub attrs: Vec<Attribute>,
         pub member: Member,
@@ -206,14 +159,16 @@ ast_struct! {
     }
 }
 
-#[cfg(not(feature = "full"))]
 mod parsing {
     use proc_macro2::TokenStream;
     use proc_macro2::{Delimiter, TokenTree};
     use syn::ext::IdentExt;
     use syn::parse::{Parse, ParseStream, Result};
     use syn::token::{Brace, Bracket, Paren};
-    use syn::*;
+    use syn::{
+        token, Expr, ExprLit, ExprPath, ExprUnary, Ident, Lit, Macro, MacroDelimiter, Member, Path,
+        PathArguments, QSelf, UnOp,
+    };
 
     use path;
 
@@ -646,7 +601,6 @@ mod parsing {
 
 }
 
-#[cfg(not(feature = "full"))]
 mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;

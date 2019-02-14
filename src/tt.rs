@@ -1,4 +1,3 @@
-
 use std::hash::{Hash, Hasher};
 
 use proc_macro2::{Delimiter, TokenStream, TokenTree};

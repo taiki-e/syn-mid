@@ -1,16 +1,6 @@
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
-        pub struct $name:ident #full $($rest:tt)*
-    ) => {
-        $(#[$attr])*
-        #[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
-    };
-
-    (
-        $(#[$attr:meta])*
         pub struct $name:ident #manual_extra_traits $($rest:tt)*
     ) => {
         $(#[$attr])*
@@ -30,7 +20,6 @@ macro_rules! ast_struct {
     };
 }
 
-#[cfg(not(feature = "full"))]
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
@@ -45,7 +34,6 @@ macro_rules! ast_enum {
     )
 }
 
-#[cfg(not(feature = "full"))]
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
@@ -94,7 +82,6 @@ macro_rules! ast_enum_of_structs {
     )
 }
 
-#[cfg(not(feature = "full"))]
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
@@ -123,14 +110,12 @@ macro_rules! generate_to_tokens {
     };
 }
 
-#[cfg(not(feature = "full"))]
 macro_rules! to_tokens_call {
     ($e:ident, $tokens:ident, $($rest:tt)*) => {
         ::quote::ToTokens::to_tokens($e, $tokens)
     };
 }
 
-#[cfg(not(feature = "full"))]
 macro_rules! maybe_ast_struct {
     (
         $(#[$attr:meta])*
