@@ -2,13 +2,14 @@
 
 extern crate proc_macro;
 extern crate proc_macro2;
+#[macro_use]
 extern crate quote;
 extern crate syn;
 extern crate syn_mid;
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::ToTokens;
 use syn::{parse_macro_input, parse_quote};
 use syn_mid::ItemFn;
 

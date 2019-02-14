@@ -43,11 +43,11 @@ before_script:
 
 script:
   - if [ "$TEST" = 1 ]; then cargo test --all --all-features; fi
-  - build
-  - build --features full
-  - build --no-default-features --features derive
-  - build --no-default-features --features full
-  - build --all-features
+  - cargo build
+  - cargo build --features full
+  - cargo build --no-default-features --features derive
+  - cargo build --no-default-features --features full
+  - cargo build --all-features
 
 notifications:
   email:

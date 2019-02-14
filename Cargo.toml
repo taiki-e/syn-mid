@@ -16,16 +16,13 @@ exclude = ["/.travis.yml"]
 members = ["examples/const_fn", "examples/const_fn_test"]
 
 [dependencies]
-proc-macro2 = "0.4.4" # https://github.com/dtolnay/syn/blob/master/Cargo.toml
-quote = "0.6" # https://github.com/dtolnay/syn/blob/master/Cargo.toml
+proc-macro2 = "0.4.19"
+quote = "0.6"
 
 [dependencies.syn]
 version = "0.15.22"
 default-features = false
 features = ["parsing", "printing", "proc-macro"]
-
-[dev-dependencies]
-quote = "0.6.8"
 
 [features]
 default = ["derive", "clone-impls"]
