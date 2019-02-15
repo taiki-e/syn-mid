@@ -34,7 +34,7 @@
 //! [syn]: https://github.com/dtolnay/syn
 //!
 
-#![doc(html_root_url = "https://docs.rs/syn-mid/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/syn-mid/0.2.0")]
 #![deny(unsafe_code)]
 #![cfg_attr(
     feature = "cargo-clippy",

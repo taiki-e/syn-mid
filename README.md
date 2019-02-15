@@ -34,7 +34,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-syn-mid = "0.1"
+syn-mid = "0.2"
 ```
 
 The current version of syn-mid requires Rust 1.15 or later.
