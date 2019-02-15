@@ -19,12 +19,11 @@ ast_enum_of_structs! {
             pub underscore_token: Token![_],
         }),
 
-        /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
+        /// A pattern that binds a new variable: `ref mut binding`.
         pub Ident(PatIdent {
             pub by_ref: Option<Token![ref]>,
             pub mutability: Option<Token![mut]>,
             pub ident: Ident,
-            pub subpat: Option<(Token![@], Box<Pat>)>,
         }),
 
         /// A struct or struct variant pattern: `Variant { x, y, .. }`.
@@ -175,15 +174,6 @@ mod parsing {
             by_ref: input.parse()?,
             mutability: input.parse()?,
             ident: input.call(Ident::parse_any)?,
-            subpat: {
-                if input.peek(Token![@]) {
-                    let at_token: Token![@] = input.parse()?;
-                    let subpat: Pat = input.parse()?;
-                    Some((at_token, Box::new(subpat)))
-                } else {
-                    None
-                }
-            },
         })
     }
 
@@ -249,7 +239,6 @@ mod parsing {
             by_ref: by_ref,
             mutability: mutability,
             ident: ident.clone(),
-            subpat: None,
         });
 
         Ok(FieldPat {
@@ -395,10 +384,6 @@ mod printing {
             self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            if let Some((ref at_token, ref subpat)) = self.subpat {
-                at_token.to_tokens(tokens);
-                subpat.to_tokens(tokens);
-            }
         }
     }
 
