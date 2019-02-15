@@ -1,5 +1,5 @@
 use syn::punctuated::Punctuated;
-use syn::{token, Attribute, Ident, Member, Path, QSelf};
+use syn::{token, Attribute, Ident, Member, Path};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
@@ -40,15 +40,8 @@ ast_enum_of_structs! {
             pub pat: PatTuple,
         }),
 
-        /// A path pattern like `Color::Red`, optionally qualified with a
-        /// self-type.
-        ///
-        /// Unqualified path patterns can legally refer to variants, structs,
-        /// constants or associated constants. Qualified path patterns like
-        /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
-        /// associated constants.
+        /// A path pattern like `Color::Red`.
         pub Path(PatPath {
-            pub qself: Option<QSelf>,
             pub path: Path,
         }),
 
@@ -142,24 +135,14 @@ mod parsing {
     }
 
     fn pat_path_or_struct(input: ParseStream) -> Result<Pat> {
-        let (qself, path) = path::qpath(input, true)?;
-
-        if qself.is_some() {
-            return Ok(Pat::Path(PatPath {
-                qself: qself,
-                path: path,
-            }));
-        }
+        let path = path::path(input, true)?;
 
         if input.peek(token::Brace) {
             pat_struct(input, path).map(Pat::Struct)
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else {
-            Ok(Pat::Path(PatPath {
-                qself: qself,
-                path: path,
-            }))
+            Ok(Pat::Path(PatPath { path: path }))
         }
     }
 
@@ -408,47 +391,9 @@ mod printing {
         }
     }
 
-    fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
-        let qself = match *qself {
-            Some(ref qself) => qself,
-            None => {
-                path.to_tokens(tokens);
-                return;
-            }
-        };
-        qself.lt_token.to_tokens(tokens);
-        qself.ty.to_tokens(tokens);
-
-        let pos = if qself.position > 0 && qself.position >= path.segments.len() {
-            path.segments.len() - 1
-        } else {
-            qself.position
-        };
-        let mut segments = path.segments.pairs();
-        if pos > 0 {
-            TokensOrDefault(&qself.as_token).to_tokens(tokens);
-            path.leading_colon.to_tokens(tokens);
-            for (i, segment) in segments.by_ref().take(pos).enumerate() {
-                if i + 1 == pos {
-                    segment.value().to_tokens(tokens);
-                    qself.gt_token.to_tokens(tokens);
-                    segment.punct().to_tokens(tokens);
-                } else {
-                    segment.to_tokens(tokens);
-                }
-            }
-        } else {
-            qself.gt_token.to_tokens(tokens);
-            path.leading_colon.to_tokens(tokens);
-        }
-        for segment in segments {
-            segment.to_tokens(tokens);
-        }
-    }
-
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            print_path(tokens, &self.qself, &self.path);
+            self.path.to_tokens(tokens)
         }
     }
 
