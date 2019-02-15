@@ -1,11 +1,8 @@
-use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
-use syn::{token, Attribute, Expr, Ident, Macro, Member, Path, QSelf};
+use syn::{token, Attribute, Ident, Member, Path, QSelf};
 
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -65,32 +62,11 @@ ast_enum_of_structs! {
             pub back: Punctuated<Pat, Token![,]>,
         }),
 
-        /// A box pattern: `box v`.
-        pub Box(PatBox {
-            pub box_token: Token![box],
-            pub pat: Box<Pat>,
-        }),
-
         /// A reference pattern: `&mut (first, second)`.
         pub Ref(PatRef {
             pub and_token: Token![&],
             pub mutability: Option<Token![mut]>,
             pub pat: Box<Pat>,
-        }),
-
-        /// A literal pattern: `0`.
-        ///
-        /// This holds an `Expr` rather than a `Lit` because negative numbers
-        /// are represented as an `Expr::Unary`.
-        pub Lit(PatLit {
-            pub expr: Box<Expr>,
-        }),
-
-        /// A range pattern: `1..=2`.
-        pub Range(PatRange {
-            pub lo: Box<Expr>,
-            pub limits: RangeLimits,
-            pub hi: Box<Expr>,
         }),
 
         /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
@@ -102,47 +78,6 @@ ast_enum_of_structs! {
             pub comma_token: Option<Token![,]>,
             pub back: Punctuated<Pat, Token![,]>,
         }),
-
-        /// A macro in expression position.
-        pub Macro(PatMacro {
-            pub mac: Macro,
-        }),
-
-        /// Tokens in pattern position not interpreted by Syn.
-        pub Verbatim(PatVerbatim #manual_extra_traits {
-            pub tts: TokenStream,
-        }),
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for PatVerbatim {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for PatVerbatim {
-    fn eq(&self, other: &Self) -> bool {
-        TokenStreamHelper(&self.tts) == TokenStreamHelper(&other.tts)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for PatVerbatim {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        TokenStreamHelper(&self.tts).hash(state);
-    }
-}
-
-ast_enum! {
-    /// Limit types of a range, inclusive or exclusive.
-    #[cfg_attr(feature = "clone-impls", derive(Copy))]
-    pub enum RangeLimits {
-        /// Inclusive at the beginning, exclusive at the end.
-        HalfOpen(Token![..]),
-        /// Inclusive at the beginning and end.
-        Closed(Token![..=]),
     }
 }
 
@@ -160,58 +95,25 @@ ast_struct! {
 }
 
 mod parsing {
-    use proc_macro2::TokenStream;
-    use proc_macro2::{Delimiter, TokenTree};
     use syn::ext::IdentExt;
     use syn::parse::{Parse, ParseStream, Result};
-    use syn::token::{Brace, Bracket, Paren};
-    use syn::{
-        token, Expr, ExprLit, ExprPath, ExprUnary, Ident, Lit, Macro, MacroDelimiter, Member, Path,
-        PathArguments, QSelf, UnOp,
-    };
+    use syn::{token, Ident, Member, Path};
 
     use path;
 
     use super::*;
-
-    impl Parse for RangeLimits {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![..=]) {
-                input.parse().map(RangeLimits::Closed)
-            } else if lookahead.peek(Token![...]) {
-                let dot3: Token![...] = input.parse()?;
-                Ok(RangeLimits::Closed(Token![..=](dot3.spans)))
-            } else if lookahead.peek(Token![..]) {
-                input.parse().map(RangeLimits::HalfOpen)
-            } else {
-                Err(lookahead.error())
-            }
-        }
-    }
 
     impl Parse for Pat {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![_]) {
                 input.call(pat_wild).map(Pat::Wild)
-            } else if lookahead.peek(Token![box]) {
-                input.call(pat_box).map(Pat::Box)
-            } else if lookahead.peek(Token![-]) || lookahead.peek(Lit) {
-                pat_lit_or_range(input)
             } else if input.peek(Ident)
                 && ({
                     input.peek2(Token![::])
                         || input.peek2(Token![!])
                         || input.peek2(token::Brace)
                         || input.peek2(token::Paren)
-                        || input.peek2(Token![..])
-                            && !{
-                                let ahead = input.fork();
-                                ahead.parse::<Ident>()?;
-                                ahead.parse::<RangeLimits>()?;
-                                ahead.is_empty() || ahead.peek(Token![,])
-                            }
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
                 || input.peek(Token![::])
@@ -221,7 +123,7 @@ mod parsing {
                 || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
-                pat_path_or_macro_or_struct_or_range(input)
+                pat_path_or_struct(input)
             } else if input.peek(Token![ref])
                 || input.peek(Token![mut])
                 || input.peek(Token![self])
@@ -240,31 +142,8 @@ mod parsing {
         }
     }
 
-    fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStream)> {
-        input.step(|cursor| {
-            if let Some((TokenTree::Group(g), rest)) = cursor.token_tree() {
-                let span = g.span();
-                let delimiter = match g.delimiter() {
-                    Delimiter::Parenthesis => MacroDelimiter::Paren(Paren(span)),
-                    Delimiter::Brace => MacroDelimiter::Brace(Brace(span)),
-                    Delimiter::Bracket => MacroDelimiter::Bracket(Bracket(span)),
-                    Delimiter::None => {
-                        return Err(cursor.error("expected delimiter"));
-                    }
-                };
-                Ok(((delimiter, g.stream().clone()), rest))
-            } else {
-                Err(cursor.error("expected delimiter"))
-            }
-        })
-    }
-
-    fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
+    fn pat_path_or_struct(input: ParseStream) -> Result<Pat> {
         let (qself, path) = path::qpath(input, true)?;
-
-        if input.peek(Token![..]) {
-            return pat_range(input, qself, path).map(Pat::Range);
-        }
 
         if qself.is_some() {
             return Ok(Pat::Path(PatPath {
@@ -273,37 +152,10 @@ mod parsing {
             }));
         }
 
-        if input.peek(Token![!]) && !input.peek(Token![!=]) {
-            let mut contains_arguments = false;
-            for segment in &path.segments {
-                match segment.arguments {
-                    PathArguments::None => {}
-                    PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                        contains_arguments = true;
-                    }
-                }
-            }
-
-            if !contains_arguments {
-                let bang_token: Token![!] = input.parse()?;
-                let (delimiter, tts) = parse_delimiter(input)?;
-                return Ok(Pat::Macro(PatMacro {
-                    mac: Macro {
-                        path: path,
-                        bang_token: bang_token,
-                        delimiter: delimiter,
-                        tts: tts,
-                    },
-                }));
-            }
-        }
-
         if input.peek(token::Brace) {
             pat_struct(input, path).map(Pat::Struct)
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
-        } else if input.peek(Token![..]) {
-            pat_range(input, qself, path).map(Pat::Range)
         } else {
             Ok(Pat::Path(PatPath {
                 qself: qself,
@@ -315,13 +167,6 @@ mod parsing {
     fn pat_wild(input: ParseStream) -> Result<PatWild> {
         Ok(PatWild {
             underscore_token: input.parse()?,
-        })
-    }
-
-    fn pat_box(input: ParseStream) -> Result<PatBox> {
-        Ok(PatBox {
-            box_token: input.parse()?,
-            pat: input.parse()?,
         })
     }
 
@@ -400,37 +245,18 @@ mod parsing {
             Member::Unnamed(_) => unreachable!(),
         };
 
-        let mut pat = Pat::Ident(PatIdent {
+        let pat = Pat::Ident(PatIdent {
             by_ref: by_ref,
             mutability: mutability,
             ident: ident.clone(),
             subpat: None,
         });
 
-        if let Some(boxed) = boxed {
-            pat = Pat::Box(PatBox {
-                pat: Box::new(pat),
-                box_token: boxed,
-            });
-        }
-
         Ok(FieldPat {
             member: Member::Named(ident),
             pat: Box::new(pat),
             attrs: Vec::new(),
             colon_token: None,
-        })
-    }
-
-    fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatRange> {
-        Ok(PatRange {
-            lo: Box::new(Expr::Path(ExprPath {
-                attrs: Vec::new(),
-                qself: qself,
-                path: path,
-            })),
-            limits: input.parse()?,
-            hi: input.call(pat_lit_expr)?,
         })
     }
 
@@ -485,57 +311,6 @@ mod parsing {
             mutability: input.parse()?,
             pat: input.parse()?,
         })
-    }
-
-    fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let lo = input.call(pat_lit_expr)?;
-        if input.peek(Token![..]) {
-            Ok(Pat::Range(PatRange {
-                lo: lo,
-                limits: input.parse()?,
-                hi: input.call(pat_lit_expr)?,
-            }))
-        } else {
-            Ok(Pat::Lit(PatLit { expr: lo }))
-        }
-    }
-
-    fn expr_lit(input: ParseStream) -> Result<ExprLit> {
-        Ok(ExprLit {
-            attrs: Vec::new(),
-            lit: input.parse()?,
-        })
-    }
-
-    fn pat_lit_expr(input: ParseStream) -> Result<Box<Expr>> {
-        let neg: Option<Token![-]> = input.parse()?;
-
-        let lookahead = input.lookahead1();
-        let expr = if lookahead.peek(Lit) {
-            Expr::Lit(input.call(expr_lit)?)
-        } else if lookahead.peek(Ident)
-            || lookahead.peek(Token![::])
-            || lookahead.peek(Token![<])
-            || lookahead.peek(Token![self])
-            || lookahead.peek(Token![Self])
-            || lookahead.peek(Token![super])
-            || lookahead.peek(Token![extern])
-            || lookahead.peek(Token![crate])
-        {
-            Expr::Path(input.parse()?)
-        } else {
-            return Err(lookahead.error());
-        };
-
-        Ok(Box::new(if let Some(neg) = neg {
-            Expr::Unary(ExprUnary {
-                attrs: Vec::new(),
-                op: UnOp::Neg(neg),
-                expr: Box::new(expr),
-            })
-        } else {
-            expr
-        }))
     }
 
     fn pat_slice(input: ParseStream) -> Result<PatSlice> {
@@ -713,35 +488,11 @@ mod printing {
         }
     }
 
-    impl ToTokens for PatBox {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.box_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
-        }
-    }
-
     impl ToTokens for PatRef {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for PatLit {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.expr.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for PatRange {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.lo.to_tokens(tokens);
-            match self.limits {
-                RangeLimits::HalfOpen(ref t) => t.to_tokens(tokens),
-                RangeLimits::Closed(ref t) => Token![...](t.spans).to_tokens(tokens),
-            }
-            self.hi.to_tokens(tokens);
         }
     }
 
@@ -777,18 +528,6 @@ mod printing {
         }
     }
 
-    impl ToTokens for PatMacro {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.mac.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for PatVerbatim {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.tts.to_tokens(tokens);
-        }
-    }
-
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             if let Some(ref colon_token) = self.colon_token {
@@ -798,5 +537,4 @@ mod printing {
             self.pat.to_tokens(tokens);
         }
     }
-
 }
