@@ -131,12 +131,6 @@ mod parsing {
 
     use super::{Block, FnArg, FnDecl, ItemFn};
 
-    fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
-        let mut attrs = outer;
-        attrs.extend(inner);
-        attrs
-    }
-
     impl Parse for ItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -158,11 +152,10 @@ mod parsing {
 
             let content;
             let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
             let stmts = content.parse()?;
 
             Ok(ItemFn {
-                attrs: attrs(outer_attrs, inner_attrs),
+                attrs: outer_attrs,
                 vis: vis,
                 constness: constness,
                 unsafety: unsafety,
