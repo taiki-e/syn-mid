@@ -1,10 +1,10 @@
 use syn::ext::IdentExt;
 use syn::parse::{ParseStream, Result};
-use syn::{Path, PathArguments, PathSegment, QSelf, Type};
+use syn::{Path, PathArguments, PathSegment};
 
 use super::*;
 
-pub trait ParseHelper: Sized {
+trait ParseHelper: Sized {
     fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self>;
 }
 
@@ -58,54 +58,6 @@ impl ParseHelper for Path {
     }
 }
 
-pub fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
-    if input.peek(Token![<]) {
-        let lt_token: Token![<] = input.parse()?;
-        let this: Type = input.parse()?;
-        let path = if input.peek(Token![as]) {
-            let as_token: Token![as] = input.parse()?;
-            let path: Path = input.parse()?;
-            Some((as_token, path))
-        } else {
-            None
-        };
-        let gt_token: Token![>] = input.parse()?;
-        let colon2_token: Token![::] = input.parse()?;
-        let mut rest = Punctuated::new();
-        loop {
-            let path = PathSegment::parse_helper(input, expr_style)?;
-            rest.push_value(path);
-            if !input.peek(Token![::]) {
-                break;
-            }
-            let punct: Token![::] = input.parse()?;
-            rest.push_punct(punct);
-        }
-        let (position, as_token, path) = match path {
-            Some((as_token, mut path)) => {
-                let pos = path.segments.len();
-                path.segments.push_punct(colon2_token);
-                path.segments.extend(rest.into_pairs());
-                (pos, Some(as_token), path)
-            }
-            None => {
-                let path = Path {
-                    leading_colon: Some(colon2_token),
-                    segments: rest,
-                };
-                (0, None, path)
-            }
-        };
-        let qself = QSelf {
-            lt_token: lt_token,
-            ty: Box::new(this),
-            position: position,
-            as_token: as_token,
-            gt_token: gt_token,
-        };
-        Ok((Some(qself), path))
-    } else {
-        let path = Path::parse_helper(input, expr_style)?;
-        Ok((None, path))
-    }
+pub fn path(input: ParseStream, expr_style: bool) -> Result<Path> {
+    Path::parse_helper(input, expr_style)
 }
