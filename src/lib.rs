@@ -34,24 +34,17 @@
 
 #![doc(html_root_url = "https://docs.rs/syn-mid/0.2.0")]
 #![deny(unsafe_code)]
+#![deny(bare_trait_objects, elided_lifetimes_in_paths)]
+#![deny(unreachable_pub)]
 #![cfg_attr(
     feature = "cargo-clippy",
-    allow(
-        renamed_and_removed_lints,
-        redundant_field_names, // Rust 1.17+ => remove
-        const_static_lifetime, // Rust 1.17+ => remove
-        deprecated_cfg_attr, // Rust 1.30+ => remove
-        map_clone,
-        large_enum_variant
-    )
+    allow(renamed_and_removed_lints, large_enum_variant)
 )]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
 extern crate proc_macro2;
 extern crate quote;
-#[allow(unused_imports)]
-#[macro_use]
 extern crate syn;
 
 #[macro_use]
@@ -66,8 +59,9 @@ pub use self::arg::*;
 pub use self::pat::*;
 
 use proc_macro2::TokenStream;
-use syn::punctuated::Punctuated;
-use syn::{token, Abi, Attribute, Generics, Ident, ReturnType, Visibility};
+use syn::{
+    punctuated::Punctuated, token, Abi, Attribute, Generics, Ident, ReturnType, Token, Visibility,
+};
 
 ast_struct! {
     /// A braced block containing Rust statements.
@@ -99,13 +93,16 @@ ast_struct! {
 }
 
 mod parsing {
-    use syn::parse::{Parse, ParseStream, Result};
-    use syn::{Abi, Attribute, Generics, Ident, ReturnType, Visibility, WhereClause};
+    use syn::{
+        braced, parenthesized,
+        parse::{Parse, ParseStream, Result},
+        Abi, Attribute, Generics, Ident, ReturnType, Token, Visibility, WhereClause,
+    };
 
     use super::{Block, FnArg, ItemFn};
 
     impl Parse for ItemFn {
-        fn parse(input: ParseStream) -> Result<Self> {
+        fn parse(input: ParseStream<'_>) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let constness: Option<Token![const]> = input.parse()?;
@@ -129,24 +126,21 @@ mod parsing {
 
             Ok(ItemFn {
                 attrs: outer_attrs,
-                vis: vis,
-                constness: constness,
-                unsafety: unsafety,
-                asyncness: asyncness,
-                abi: abi,
-                ident: ident,
-                fn_token: fn_token,
-                paren_token: paren_token,
-                inputs: inputs,
-                output: output,
+                vis,
+                constness,
+                unsafety,
+                asyncness,
+                abi,
+                ident,
+                fn_token,
+                paren_token,
+                inputs,
+                output,
                 generics: Generics {
-                    where_clause: where_clause,
+                    where_clause,
                     ..generics
                 },
-                block: Block {
-                    brace_token: brace_token,
-                    stmts: stmts,
-                },
+                block: Block { brace_token, stmts },
             })
         }
     }
@@ -156,7 +150,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    use super::*;
+    use super::{Block, ItemFn};
 
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut TokenStream) {

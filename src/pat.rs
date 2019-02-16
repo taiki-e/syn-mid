@@ -1,5 +1,4 @@
-use syn::punctuated::Punctuated;
-use syn::{token, Attribute, Ident, Member, Path};
+use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token};
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -84,16 +83,24 @@ ast_struct! {
 }
 
 mod parsing {
-    use syn::ext::IdentExt;
-    use syn::parse::{Parse, ParseStream, Result};
-    use syn::{token, Ident, Member, Path};
+    use syn::{
+        braced, bracketed,
+        ext::IdentExt,
+        parenthesized,
+        parse::{Parse, ParseStream, Result},
+        punctuated::Punctuated,
+        token, Ident, Member, Path, Token,
+    };
 
-    use path;
+    use crate::path;
 
-    use super::*;
+    use super::{
+        FieldPat, Pat, PatIdent, PatPath, PatRef, PatSlice, PatStruct, PatTuple, PatTupleStruct,
+        PatWild,
+    };
 
     impl Parse for Pat {
-        fn parse(input: ParseStream) -> Result<Self> {
+        fn parse(input: ParseStream<'_>) -> Result<Self> {
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![_]) {
                 input.call(pat_wild).map(Pat::Wild)
@@ -131,7 +138,7 @@ mod parsing {
         }
     }
 
-    fn pat_path_or_struct(input: ParseStream) -> Result<Pat> {
+    fn pat_path_or_struct(input: ParseStream<'_>) -> Result<Pat> {
         let path = path::parse_path(input)?;
 
         if input.peek(token::Brace) {
@@ -139,17 +146,17 @@ mod parsing {
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else {
-            Ok(Pat::Path(PatPath { path: path }))
+            Ok(Pat::Path(PatPath { path }))
         }
     }
 
-    fn pat_wild(input: ParseStream) -> Result<PatWild> {
+    fn pat_wild(input: ParseStream<'_>) -> Result<PatWild> {
         Ok(PatWild {
             underscore_token: input.parse()?,
         })
     }
 
-    fn pat_ident(input: ParseStream) -> Result<PatIdent> {
+    fn pat_ident(input: ParseStream<'_>) -> Result<PatIdent> {
         Ok(PatIdent {
             by_ref: input.parse()?,
             mutability: input.parse()?,
@@ -157,14 +164,14 @@ mod parsing {
         })
     }
 
-    fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
+    fn pat_tuple_struct(input: ParseStream<'_>, path: Path) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
-            path: path,
+            path,
             pat: input.call(pat_tuple)?,
         })
     }
 
-    fn pat_struct(input: ParseStream, path: Path) -> Result<PatStruct> {
+    fn pat_struct(input: ParseStream<'_>, path: Path) -> Result<PatStruct> {
         let content;
         let brace_token = braced!(content in input);
 
@@ -186,14 +193,14 @@ mod parsing {
         };
 
         Ok(PatStruct {
-            path: path,
-            brace_token: brace_token,
-            fields: fields,
-            dot2_token: dot2_token,
+            path,
+            brace_token,
+            fields,
+            dot2_token,
         })
     }
 
-    fn field_pat(input: ParseStream) -> Result<FieldPat> {
+    fn field_pat(input: ParseStream<'_>) -> Result<FieldPat> {
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
@@ -204,7 +211,7 @@ mod parsing {
         {
             return Ok(FieldPat {
                 attrs: Vec::new(),
-                member: member,
+                member,
                 colon_token: input.parse()?,
                 pat: input.parse()?,
             });
@@ -216,8 +223,8 @@ mod parsing {
         };
 
         let pat = Pat::Ident(PatIdent {
-            by_ref: by_ref,
-            mutability: mutability,
+            by_ref,
+            mutability,
             ident: ident.clone(),
         });
 
@@ -229,7 +236,7 @@ mod parsing {
         })
     }
 
-    fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
+    fn pat_tuple(input: ParseStream<'_>) -> Result<PatTuple> {
         let content;
         let paren_token = parenthesized!(content in input);
 
@@ -266,15 +273,15 @@ mod parsing {
         }
 
         Ok(PatTuple {
-            paren_token: paren_token,
-            front: front,
-            dot2_token: dot2_token,
-            comma_token: comma_token,
-            back: back,
+            paren_token,
+            front,
+            dot2_token,
+            comma_token,
+            back,
         })
     }
 
-    fn pat_ref(input: ParseStream) -> Result<PatRef> {
+    fn pat_ref(input: ParseStream<'_>) -> Result<PatRef> {
         Ok(PatRef {
             and_token: input.parse()?,
             mutability: input.parse()?,
@@ -282,7 +289,7 @@ mod parsing {
         })
     }
 
-    fn pat_slice(input: ParseStream) -> Result<PatSlice> {
+    fn pat_slice(input: ParseStream<'_>) -> Result<PatSlice> {
         let content;
         let bracket_token = bracketed!(content in input);
 
@@ -327,12 +334,12 @@ mod parsing {
         }
 
         Ok(PatSlice {
-            bracket_token: bracket_token,
-            front: front,
-            middle: middle,
-            dot2_token: dot2_token,
-            comma_token: comma_token,
-            back: back,
+            bracket_token,
+            front,
+            middle,
+            dot2_token,
+            comma_token,
+            back,
         })
     }
 
@@ -348,10 +355,13 @@ mod parsing {
 mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
+    use syn::Token;
 
-    use print::TokensOrDefault;
+    use crate::print::TokensOrDefault;
 
-    use super::*;
+    use super::{
+        FieldPat, PatIdent, PatPath, PatRef, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatWild,
+    };
 
     impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut TokenStream) {

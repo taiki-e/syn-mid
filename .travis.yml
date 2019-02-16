@@ -8,14 +8,11 @@ matrix:
   include:
     # This is the minimum Rust version supported by syn-mid.
     # When updating this, the reminder to update the minimum required version in README.md.
-    - rust: 1.15.1 # https://github.com/dtolnay/syn/blob/master/.travis.yml
+    - rust: 1.30.0
 
     - rust: stable
-      env: TEST=1
     - rust: beta
-      env: TEST=1
     - rust: nightly
-      env: TEST=1
 
     - rust: nightly
       name: cargo test (minimal versions)
@@ -42,9 +39,9 @@ before_script:
   - set -o errexit
 
 script:
-  - if [ "$TEST" = 1 ]; then cargo test --all --all-features; fi
   - cargo build
   - cargo build --all-features
+  - cargo test --all --all-features
 
 notifications:
   email:

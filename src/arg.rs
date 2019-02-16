@@ -1,6 +1,6 @@
-use syn::{Lifetime, Type};
+use syn::{Lifetime, Token, Type};
 
-use super::*;
+use super::Pat;
 
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
@@ -42,12 +42,15 @@ ast_enum_of_structs! {
 }
 
 mod parsing {
-    use syn::parse::{Parse, ParseStream, Result};
+    use syn::{
+        parse::{Parse, ParseStream, Result},
+        Token, Type,
+    };
 
-    use super::*;
+    use super::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg};
 
     impl Parse for FnArg {
-        fn parse(input: ParseStream) -> Result<Self> {
+        fn parse(input: ParseStream<'_>) -> Result<Self> {
             if input.peek(Token![&]) {
                 let ahead = input.fork();
                 if ahead.call(arg_self_ref).is_ok() && !ahead.peek(Token![:]) {
@@ -77,7 +80,7 @@ mod parsing {
         }
     }
 
-    fn arg_self_ref(input: ParseStream) -> Result<ArgSelfRef> {
+    fn arg_self_ref(input: ParseStream<'_>) -> Result<ArgSelfRef> {
         Ok(ArgSelfRef {
             and_token: input.parse()?,
             lifetime: input.parse()?,
@@ -86,14 +89,14 @@ mod parsing {
         })
     }
 
-    fn arg_self(input: ParseStream) -> Result<ArgSelf> {
+    fn arg_self(input: ParseStream<'_>) -> Result<ArgSelf> {
         Ok(ArgSelf {
             mutability: input.parse()?,
             self_token: input.parse()?,
         })
     }
 
-    fn arg_captured(input: ParseStream) -> Result<ArgCaptured> {
+    fn arg_captured(input: ParseStream<'_>) -> Result<ArgCaptured> {
         Ok(ArgCaptured {
             pat: input.parse()?,
             colon_token: input.parse()?,
@@ -106,7 +109,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    use super::*;
+    use super::{ArgCaptured, ArgSelf, ArgSelfRef};
 
     impl ToTokens for ArgSelfRef {
         fn to_tokens(&self, tokens: &mut TokenStream) {
