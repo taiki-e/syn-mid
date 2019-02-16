@@ -1,19 +1,6 @@
-use syn::punctuated::Punctuated;
-use syn::{token, Generics, Lifetime, ReturnType, Type};
+use syn::{Lifetime, Type};
 
 use super::*;
-
-ast_struct! {
-    /// Header of a function declaration, without including the body.
-    pub struct FnDecl {
-        pub fn_token: Token![fn],
-        pub generics: Generics,
-        pub paren_token: token::Paren,
-        pub inputs: Punctuated<FnArg, Token![,]>,
-        pub variadic: Option<Token![...]>,
-        pub output: ReturnType,
-    }
-}
 
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
