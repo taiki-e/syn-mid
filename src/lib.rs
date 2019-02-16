@@ -67,7 +67,7 @@ pub use self::pat::*;
 
 use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
-use syn::{token, Abi, AttrStyle, Attribute, Ident, Visibility};
+use syn::{token, Abi, Attribute, Ident, Visibility};
 
 ast_struct! {
     /// A braced block containing Rust statements.
@@ -154,7 +154,6 @@ mod parsing {
 mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
-    use std::iter;
 
     use super::*;
 
@@ -166,45 +165,9 @@ mod printing {
         }
     }
 
-    trait FilterAttrs<'a> {
-        type Ret: Iterator<Item = &'a Attribute>;
-
-        fn outer(self) -> Self::Ret;
-        fn inner(self) -> Self::Ret;
-    }
-
-    impl<'a, T> FilterAttrs<'a> for T
-    where
-        T: IntoIterator<Item = &'a Attribute>,
-    {
-        type Ret = iter::Filter<T::IntoIter, fn(&&Attribute) -> bool>;
-
-        fn outer(self) -> Self::Ret {
-            #[cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
-            fn is_outer(attr: &&Attribute) -> bool {
-                match attr.style {
-                    AttrStyle::Outer => true,
-                    _ => false,
-                }
-            }
-            self.into_iter().filter(is_outer)
-        }
-
-        fn inner(self) -> Self::Ret {
-            #[cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
-            fn is_inner(attr: &&Attribute) -> bool {
-                match attr.style {
-                    AttrStyle::Inner(_) => true,
-                    _ => false,
-                }
-            }
-            self.into_iter().filter(is_inner)
-        }
-    }
-
     impl ToTokens for ItemFn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
+            tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
@@ -212,7 +175,6 @@ mod printing {
             self.abi.to_tokens(tokens);
             NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
-                tokens.append_all(self.attrs.inner());
                 tokens.append_all(self.block.stmts.clone());
             });
         }
