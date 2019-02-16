@@ -71,7 +71,7 @@ use syn::{token, Abi, AttrStyle, Attribute, Ident, Visibility};
 
 ast_struct! {
     /// A braced block containing Rust statements.
-    pub struct Block #manual_extra_traits {
+    pub struct Block {
         pub brace_token: token::Brace,
         /// Statements in a block
         pub stmts: TokenStream,
