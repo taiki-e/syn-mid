@@ -49,8 +49,6 @@ syn-mid in the default features aims to provide the features between "full" and 
 
 * **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
   types.
-* **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
-  types.
 
 ## License
 

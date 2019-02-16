@@ -28,4 +28,3 @@ features = ["parsing", "printing", "proc-macro", "derive"]
 default = ["clone-impls"]
 
 clone-impls = ["syn/clone-impls"]
-extra-traits = ["syn/extra-traits"]

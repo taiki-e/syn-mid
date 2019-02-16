@@ -26,8 +26,6 @@
 //!
 //! * **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
 //!   types.
-//! * **`extra-traits`** — Debug, Eq, PartialEq, Hash impls for all syntax tree
-//!   types.
 //!
 //! [`syn_mid::ItemFn`]: struct.ItemFn.html
 //! [`syn_mid::Block`]: struct.Block.html
@@ -63,8 +61,6 @@ mod expr;
 mod item;
 mod path;
 mod print;
-#[cfg(feature = "extra-traits")]
-mod tt;
 
 pub use self::expr::*;
 pub use self::item::*;
@@ -73,39 +69,12 @@ use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::{token, Abi, AttrStyle, Attribute, Ident, Visibility};
 
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
-#[cfg(feature = "extra-traits")]
-use tt::TokenStreamHelper;
-
 ast_struct! {
     /// A braced block containing Rust statements.
     pub struct Block #manual_extra_traits {
         pub brace_token: token::Brace,
         /// Statements in a block
         pub stmts: TokenStream,
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Eq for Block {}
-
-#[cfg(feature = "extra-traits")]
-impl PartialEq for Block {
-    fn eq(&self, other: &Self) -> bool {
-        self.brace_token == other.brace_token
-            && TokenStreamHelper(&self.stmts) == TokenStreamHelper(&other.stmts)
-    }
-}
-
-#[cfg(feature = "extra-traits")]
-impl Hash for Block {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.brace_token.hash(state);
-        TokenStreamHelper(&self.stmts).hash(state);
     }
 }
 
