@@ -101,6 +101,16 @@ mod parsing {
 
     use super::{Block, FnArg, ItemFn};
 
+    impl Parse for Block {
+        fn parse(input: ParseStream<'_>) -> Result<Self> {
+            let content;
+            Ok(Block {
+                brace_token: braced!(content in input),
+                stmts: content.parse()?,
+            })
+        }
+    }
+
     impl Parse for ItemFn {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -120,9 +130,7 @@ mod parsing {
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
-            let stmts = content.parse()?;
+            let block = input.parse()?;
 
             Ok(ItemFn {
                 attrs: outer_attrs,
@@ -140,7 +148,7 @@ mod parsing {
                     where_clause,
                     ..generics
                 },
-                block: Block { brace_token, stmts },
+                block,
             })
         }
     }
