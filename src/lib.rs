@@ -67,7 +67,7 @@ pub use self::pat::*;
 
 use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
-use syn::{token, Abi, Attribute, Ident, Visibility};
+use syn::{token, Abi, Attribute, Generics, Ident, ReturnType, Visibility};
 
 ast_struct! {
     /// A braced block containing Rust statements.
@@ -89,7 +89,12 @@ ast_struct! {
         pub asyncness: Option<Token![async]>,
         pub abi: Option<Abi>,
         pub ident: Ident,
-        pub decl: Box<FnDecl>,
+        pub fn_token: Token![fn],
+        pub generics: Generics,
+        pub paren_token: token::Paren,
+        pub inputs: Punctuated<FnArg, Token![,]>,
+        pub variadic: Option<Token![...]>,
+        pub output: ReturnType,
         pub block: Block,
     }
 }
@@ -98,7 +103,7 @@ mod parsing {
     use syn::parse::{Parse, ParseStream, Result};
     use syn::{Abi, Attribute, Generics, Ident, ReturnType, Visibility, WhereClause};
 
-    use super::{Block, FnArg, FnDecl, ItemFn};
+    use super::{Block, FnArg, ItemFn};
 
     impl Parse for ItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -131,17 +136,15 @@ mod parsing {
                 asyncness: asyncness,
                 abi: abi,
                 ident: ident,
-                decl: Box::new(FnDecl {
-                    fn_token: fn_token,
-                    paren_token: paren_token,
-                    inputs: inputs,
-                    output: output,
-                    variadic: None,
-                    generics: Generics {
-                        where_clause: where_clause,
-                        ..generics
-                    },
-                }),
+                fn_token: fn_token,
+                paren_token: paren_token,
+                inputs: inputs,
+                output: output,
+                variadic: None,
+                generics: Generics {
+                    where_clause: where_clause,
+                    ..generics
+                },
                 block: Block {
                     brace_token: brace_token,
                     stmts: stmts,
@@ -173,29 +176,21 @@ mod printing {
             self.unsafety.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
             self.abi.to_tokens(tokens);
-            NamedDecl(&self.decl, &self.ident).to_tokens(tokens);
+            self.fn_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.inputs.to_tokens(tokens);
+                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
+                    <Token![,]>::default().to_tokens(tokens);
+                }
+                self.variadic.to_tokens(tokens);
+            });
+            self.output.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.block.stmts.clone());
             });
-        }
-    }
-
-    struct NamedDecl<'a>(&'a FnDecl, &'a Ident);
-
-    impl<'a> ToTokens for NamedDecl<'a> {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.0.fn_token.to_tokens(tokens);
-            self.1.to_tokens(tokens);
-            self.0.generics.to_tokens(tokens);
-            self.0.paren_token.surround(tokens, |tokens| {
-                self.0.inputs.to_tokens(tokens);
-                if self.0.variadic.is_some() && !self.0.inputs.empty_or_trailing() {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-                self.0.variadic.to_tokens(tokens);
-            });
-            self.0.output.to_tokens(tokens);
-            self.0.generics.where_clause.to_tokens(tokens);
         }
     }
 }
