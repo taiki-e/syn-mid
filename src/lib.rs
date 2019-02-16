@@ -57,12 +57,12 @@ extern crate syn;
 #[macro_use]
 mod macros;
 
-mod item;
+mod arg;
 mod pat;
 mod path;
 mod print;
 
-pub use self::item::*;
+pub use self::arg::*;
 pub use self::pat::*;
 
 use proc_macro2::TokenStream;
