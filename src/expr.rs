@@ -1,9 +1,6 @@
 use syn::punctuated::Punctuated;
 use syn::{token, Attribute, Ident, Member, Path};
 
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
-
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
     /// various other places.
