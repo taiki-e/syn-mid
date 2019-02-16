@@ -132,7 +132,7 @@ mod parsing {
     }
 
     fn pat_path_or_struct(input: ParseStream) -> Result<Pat> {
-        let path = path::path(input, true)?;
+        let path = path::parse_path(input)?;
 
         if input.peek(token::Brace) {
             pat_struct(input, path).map(Pat::Struct)
