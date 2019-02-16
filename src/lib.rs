@@ -93,7 +93,6 @@ ast_struct! {
         pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnArg, Token![,]>,
-        pub variadic: Option<Token![...]>,
         pub output: ReturnType,
         pub block: Block,
     }
@@ -140,7 +139,6 @@ mod parsing {
                 paren_token: paren_token,
                 inputs: inputs,
                 output: output,
-                variadic: None,
                 generics: Generics {
                     where_clause: where_clause,
                     ..generics
@@ -181,10 +179,6 @@ mod printing {
             self.generics.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
-                if self.variadic.is_some() && !self.inputs.empty_or_trailing() {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-                self.variadic.to_tokens(tokens);
             });
             self.output.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
