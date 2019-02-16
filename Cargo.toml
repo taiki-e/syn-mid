@@ -25,6 +25,5 @@ default-features = false
 features = ["parsing", "printing", "proc-macro", "derive"]
 
 [features]
-default = ["clone-impls"]
-
+default = []
 clone-impls = ["syn/clone-impls"]

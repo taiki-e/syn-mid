@@ -45,9 +45,7 @@ The current version of syn-mid requires Rust 1.15 or later.
 
 ## Optional features
 
-syn-mid in the default features aims to provide the features between "full" and "derive" of [syn].
-
-* **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
+* **`clone-impls`** — Clone impls for all syntax tree
   types.
 
 ## License
