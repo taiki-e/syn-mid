@@ -1,10 +1,11 @@
-use syn::ext::IdentExt;
-use syn::parse::{ParseStream, Result};
-use syn::{Path, PathArguments, PathSegment};
+use syn::{
+    ext::IdentExt,
+    parse::{ParseStream, Result},
+    punctuated::Punctuated,
+    Ident, Path, PathArguments, PathSegment, Token,
+};
 
-use super::*;
-
-fn parse_path_segment(input: ParseStream) -> Result<PathSegment> {
+fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
     if input.peek(Token![super])
         || input.peek(Token![self])
         || input.peek(Token![Self])
@@ -18,7 +19,7 @@ fn parse_path_segment(input: ParseStream) -> Result<PathSegment> {
     let ident = input.parse()?;
     if input.peek(Token![::]) && input.peek3(Token![<]) {
         Ok(PathSegment {
-            ident: ident,
+            ident,
             arguments: PathArguments::AngleBracketed(input.parse()?),
         })
     } else {
@@ -26,7 +27,7 @@ fn parse_path_segment(input: ParseStream) -> Result<PathSegment> {
     }
 }
 
-pub fn parse_path(input: ParseStream) -> Result<Path> {
+pub(crate) fn parse_path(input: ParseStream<'_>) -> Result<Path> {
     if input.peek(Token![dyn]) {
         return Err(input.error("expected path"));
     }

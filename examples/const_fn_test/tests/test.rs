@@ -1,11 +1,11 @@
 #![cfg_attr(any(const_unstable), feature(const_fn, const_vec_new))]
 #![deny(warnings)]
-#![allow(unused_imports)]
 #![allow(dead_code)]
 #![cfg(test)]
 
-#[macro_use]
 extern crate const_fn;
+
+use const_fn::const_fn;
 
 #[test]
 fn test_variables() {

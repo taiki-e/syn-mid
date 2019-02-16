@@ -4,7 +4,7 @@
 [![version](https://img.shields.io/crates/v/syn-mid.svg)](https://crates.io/crates/syn-mid/)
 [![documentation](https://docs.rs/syn-mid/badge.svg)](https://docs.rs/syn-mid/)
 [![license](https://img.shields.io/crates/l/syn-mid.svg)](https://crates.io/crates/syn-mid/)
-[![Rustc Version](https://img.shields.io/badge/rustc-1.15+-lightgray.svg)](https://blog.rust-lang.org/2017/02/02/Rust-1.15.html)
+[![Rustc Version](https://img.shields.io/badge/rustc-1.30+-lightgray.svg)](https://blog.rust-lang.org/2018/10/25/Rust-1.30.0.html)
 
 Providing the features between "full" and "derive" of syn.
 
@@ -37,7 +37,7 @@ Add this to your `Cargo.toml`:
 syn-mid = "0.2"
 ```
 
-The current version of syn-mid requires Rust 1.15 or later.
+The current version of syn-mid requires Rust 1.30 or later.
 
 [**Examples**](examples)
 
