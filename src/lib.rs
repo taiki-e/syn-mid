@@ -38,7 +38,7 @@
 #![deny(unreachable_pub)]
 #![cfg_attr(
     feature = "cargo-clippy",
-    allow(renamed_and_removed_lints, large_enum_variant)
+    allow(renamed_and_removed_lints, eval_order_dependence, large_enum_variant)
 )]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
