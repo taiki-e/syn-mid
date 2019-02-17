@@ -12,4 +12,4 @@ path = "lib.rs"
 proc-macro2 = "0.4.19"
 quote = "0.6.8"
 syn = "0.15.22"
-syn-mid = { version = "0.2", path = "../..", features = ["clone-impls"] }
+syn-mid = { version = "0.3", path = "../..", features = ["clone-impls"] }

@@ -31,7 +31,7 @@
 //! [syn]: https://github.com/dtolnay/syn
 //!
 
-#![doc(html_root_url = "https://docs.rs/syn-mid/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/syn-mid/0.3.0")]
 #![deny(unsafe_code)]
 #![deny(bare_trait_objects, elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
