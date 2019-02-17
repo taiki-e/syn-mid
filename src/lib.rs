@@ -24,8 +24,7 @@
 //! syn-mid in the default features aims to provide the features between "full"
 //! and "derive" of [syn].
 //!
-//! * **`clone-impls`** *(enabled by default)* — Clone impls for all syntax tree
-//!   types.
+//! * **`clone-impls`** — Clone impls for all syntax tree types.
 //!
 //! [`syn_mid::ItemFn`]: struct.ItemFn.html
 //! [`syn_mid::Block`]: struct.Block.html

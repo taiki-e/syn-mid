@@ -45,8 +45,7 @@ The current version of syn-mid requires Rust 1.30 or later.
 
 ## Optional features
 
-* **`clone-impls`** — Clone impls for all syntax tree
-  types.
+* **`clone-impls`** — Clone impls for all syntax tree types.
 
 ## License
 
