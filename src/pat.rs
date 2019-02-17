@@ -44,10 +44,7 @@ ast_enum_of_structs! {
         /// A tuple pattern: `(a, b)`.
         pub Tuple(PatTuple {
             pub paren_token: token::Paren,
-            pub front: Punctuated<Pat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
-            pub comma_token: Option<Token![,]>,
-            pub back: Punctuated<Pat, Token![,]>,
+            pub elements: Punctuated<Pat, Token![,]>,
         }),
 
         /// A reference pattern: `&mut (first, second)`.
@@ -240,44 +237,20 @@ mod parsing {
         let content;
         let paren_token = parenthesized!(content in input);
 
-        let mut front = Punctuated::new();
-        let mut dot2_token = None::<Token![..]>;
-        let mut comma_token = None::<Token![,]>;
-        loop {
-            if content.is_empty() {
-                break;
-            }
-            if content.peek(Token![..]) {
-                dot2_token = Some(content.parse()?);
-                comma_token = content.parse()?;
-                break;
-            }
-            let value: Pat = content.parse()?;
-            front.push_value(value);
-            if content.is_empty() {
-                break;
-            }
-            let punct = content.parse()?;
-            front.push_punct(punct);
-        }
-
-        let mut back = Punctuated::new();
+        let mut elements = Punctuated::new();
         while !content.is_empty() {
             let value: Pat = content.parse()?;
-            back.push_value(value);
+            elements.push_value(value);
             if content.is_empty() {
                 break;
             }
             let punct = content.parse()?;
-            back.push_punct(punct);
+            elements.push_punct(punct);
         }
 
         Ok(PatTuple {
             paren_token,
-            front,
-            dot2_token,
-            comma_token,
-            back,
+            elements,
         })
     }
 
@@ -407,20 +380,7 @@ mod printing {
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
-                self.front.to_tokens(tokens);
-                if let Some(ref dot2_token) = self.dot2_token {
-                    if !self.front.empty_or_trailing() {
-                        // Ensure there is a comma before the .. token.
-                        <Token![,]>::default().to_tokens(tokens);
-                    }
-                    dot2_token.to_tokens(tokens);
-                    self.comma_token.to_tokens(tokens);
-                    if self.comma_token.is_none() && !self.back.is_empty() {
-                        // Ensure there is a comma after the .. token.
-                        <Token![,]>::default().to_tokens(tokens);
-                    }
-                }
-                self.back.to_tokens(tokens);
+                self.elements.to_tokens(tokens);
             });
         }
     }
