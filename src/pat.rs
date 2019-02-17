@@ -93,13 +93,11 @@ mod parsing {
             } else if input.peek(Ident)
                 && ({
                     input.peek2(Token![::])
-                        || input.peek2(Token![!])
                         || input.peek2(token::Brace)
                         || input.peek2(token::Paren)
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
                 || input.peek(Token![::])
-                || input.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
                 || input.peek(Token![extern])
