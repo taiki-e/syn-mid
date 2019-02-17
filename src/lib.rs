@@ -53,7 +53,6 @@ mod macros;
 mod arg;
 mod pat;
 mod path;
-mod print;
 
 pub use self::arg::*;
 pub use self::pat::*;

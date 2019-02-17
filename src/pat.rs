@@ -53,16 +53,6 @@ ast_enum_of_structs! {
             pub mutability: Option<Token![mut]>,
             pub pat: Box<Pat>,
         }),
-
-        /// A dynamically sized slice pattern: `[a, b, i.., y, z]`.
-        pub Slice(PatSlice {
-            pub bracket_token: token::Bracket,
-            pub front: Punctuated<Pat, Token![,]>,
-            pub middle: Option<Box<Pat>>,
-            pub dot2_token: Option<Token![..]>,
-            pub comma_token: Option<Token![,]>,
-            pub back: Punctuated<Pat, Token![,]>,
-        }),
     }
 }
 
@@ -81,7 +71,7 @@ ast_struct! {
 
 mod parsing {
     use syn::{
-        braced, bracketed,
+        braced,
         ext::IdentExt,
         parenthesized,
         parse::{Parse, ParseStream, Result},
@@ -92,8 +82,7 @@ mod parsing {
     use crate::path;
 
     use super::{
-        FieldPat, Pat, PatIdent, PatPath, PatRef, PatSlice, PatStruct, PatTuple, PatTupleStruct,
-        PatWild,
+        FieldPat, Pat, PatIdent, PatPath, PatRef, PatStruct, PatTuple, PatTupleStruct, PatWild,
     };
 
     impl Parse for Pat {
@@ -127,8 +116,6 @@ mod parsing {
                 input.call(pat_tuple).map(Pat::Tuple)
             } else if lookahead.peek(Token![&]) {
                 input.call(pat_ref).map(Pat::Ref)
-            } else if lookahead.peek(token::Bracket) {
-                input.call(pat_slice).map(Pat::Slice)
             } else {
                 Err(lookahead.error())
             }
@@ -262,60 +249,6 @@ mod parsing {
         })
     }
 
-    fn pat_slice(input: ParseStream<'_>) -> Result<PatSlice> {
-        let content;
-        let bracket_token = bracketed!(content in input);
-
-        let mut front = Punctuated::new();
-        let mut middle = None;
-        loop {
-            if content.is_empty() || content.peek(Token![..]) {
-                break;
-            }
-            let value: Pat = content.parse()?;
-            if content.peek(Token![..]) {
-                middle = Some(Box::new(value));
-                break;
-            }
-            front.push_value(value);
-            if content.is_empty() {
-                break;
-            }
-            let punct = content.parse()?;
-            front.push_punct(punct);
-        }
-
-        let dot2_token: Option<Token![..]> = content.parse()?;
-        let mut comma_token = None::<Token![,]>;
-        let mut back = Punctuated::new();
-        if dot2_token.is_some() {
-            comma_token = content.parse()?;
-            if comma_token.is_some() {
-                loop {
-                    if content.is_empty() {
-                        break;
-                    }
-                    let value: Pat = content.parse()?;
-                    back.push_value(value);
-                    if content.is_empty() {
-                        break;
-                    }
-                    let punct = content.parse()?;
-                    back.push_punct(punct);
-                }
-            }
-        }
-
-        Ok(PatSlice {
-            bracket_token,
-            front,
-            middle,
-            dot2_token,
-            comma_token,
-            back,
-        })
-    }
-
     fn is_unnamed(member: &Member) -> bool {
         match *member {
             Member::Named(_) => false,
@@ -330,10 +263,8 @@ mod printing {
     use quote::ToTokens;
     use syn::Token;
 
-    use crate::print::TokensOrDefault;
-
     use super::{
-        FieldPat, PatIdent, PatPath, PatRef, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatWild,
+        FieldPat, PatIdent, PatPath, PatRef, PatStruct, PatTuple, PatTupleStruct, PatWild,
     };
 
     impl ToTokens for PatWild {
@@ -390,38 +321,6 @@ mod printing {
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for PatSlice {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.bracket_token.surround(tokens, |tokens| {
-                self.front.to_tokens(tokens);
-
-                // If we need a comma before the middle or standalone .. token,
-                // then make sure it's present.
-                if !self.front.empty_or_trailing()
-                    && (self.middle.is_some() || self.dot2_token.is_some())
-                {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-
-                // If we have an identifier, we always need a .. token.
-                if self.middle.is_some() {
-                    self.middle.to_tokens(tokens);
-                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
-                } else if self.dot2_token.is_some() {
-                    self.dot2_token.to_tokens(tokens);
-                }
-
-                // Make sure we have a comma before the back half.
-                if !self.back.is_empty() {
-                    TokensOrDefault(&self.comma_token).to_tokens(tokens);
-                    self.back.to_tokens(tokens);
-                } else {
-                    self.comma_token.to_tokens(tokens);
-                }
-            })
         }
     }
 
