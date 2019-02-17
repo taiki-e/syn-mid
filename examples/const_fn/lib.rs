@@ -7,7 +7,7 @@ extern crate syn_mid;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{parse_macro_input, parse_quote};
+use syn::parse_macro_input;
 use syn_mid::ItemFn;
 
 // These codes copied from https://github.com/taiki-e/const_fn/blob/master/src/lib.rs
@@ -27,8 +27,10 @@ pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
     }
 
     let args = TokenStream2::from(args);
-    function.attrs.push(parse_quote!(#[cfg(not(#args))]));
-    const_function.attrs.push(parse_quote!(#[cfg(#args)]));
-
-    quote!(#function #const_function).into()
+    TokenStream::from(quote! {
+        #[cfg(not(#args))]
+        #function
+        #[cfg(#args)]
+        #const_function
+    })
 }
