@@ -32,19 +32,15 @@
 //!
 
 #![doc(html_root_url = "https://docs.rs/syn-mid/0.3.0")]
-#![deny(unsafe_code)]
-#![deny(bare_trait_objects, elided_lifetimes_in_paths)]
-#![deny(unreachable_pub)]
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(renamed_and_removed_lints, eval_order_dependence, large_enum_variant)
-)]
+#![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
+#![warn(unsafe_code)]
+#![warn(rust_2018_idioms, unreachable_pub)]
+#![warn(single_use_lifetimes)]
+#![warn(clippy::all, clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![allow(clippy::eval_order_dependence, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
-
-extern crate proc_macro2;
-extern crate quote;
-extern crate syn;
 
 #[macro_use]
 mod macros;
@@ -102,7 +98,7 @@ mod parsing {
     impl Parse for Block {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let content;
-            Ok(Block {
+            Ok(Self {
                 brace_token: braced!(content in input),
                 stmts: content.parse()?,
             })
@@ -130,7 +126,7 @@ mod parsing {
 
             let block = input.parse()?;
 
-            Ok(ItemFn {
+            Ok(Self {
                 attrs: outer_attrs,
                 vis,
                 constness,
