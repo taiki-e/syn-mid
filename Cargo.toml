@@ -10,7 +10,7 @@ documentation = "https://docs.rs/syn-mid/"
 readme = "README.md"
 keywords = ["syn", "macros"]
 categories = ["development-tools::procedural-macro-helpers"]
-exclude = ["/.travis.yml"]
+exclude = ["/.travis.yml", "/bors.toml"]
 
 [workspace]
 members = ["examples/const_fn", "examples/const_fn_test"]
