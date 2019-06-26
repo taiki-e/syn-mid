@@ -1,8 +1,6 @@
+#![warn(rust_2018_idioms)]
+
 extern crate proc_macro;
-extern crate proc_macro2;
-extern crate quote;
-extern crate syn;
-extern crate syn_mid;
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;

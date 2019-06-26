@@ -40,7 +40,7 @@ macro_rules! ast_enum_of_structs {
 
             $(
                 impl From<$member> for $name {
-                    fn from(e: $member) -> $name {
+                    fn from(e: $member) -> Self {
                         $name::$variant(e)
                     }
                 }
@@ -66,7 +66,7 @@ macro_rules! generate_to_tokens {
 
     (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident [$($rest:tt)*], $($next:tt)*}) => {
         generate_to_tokens!(
-            ($($arms)* $name::$variant(ref _e) => ::quote::ToTokens::to_tokens(_e, $tokens),)
+            ($($arms)* $name::$variant(_e) => ::quote::ToTokens::to_tokens(_e, $tokens),)
             $tokens $name { $($next)* }
         );
     };
@@ -74,7 +74,7 @@ macro_rules! generate_to_tokens {
     (($($arms:tt)*) $tokens:ident $name:ident {}) => {
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, $tokens: &mut ::proc_macro2::TokenStream) {
-                match *self {
+                match self {
                     $($arms)*
                 }
             }

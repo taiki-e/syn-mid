@@ -1,5 +1,7 @@
 # Unreleased
 
+* Transitioned to Rust 2018. With this change, bumped the minimum required version from Rust 1.30 to Rust 1.31.
+
 # 0.3.0 - 2019-02-18
 
 * Removed support for unneeded syntax.

@@ -1,9 +1,6 @@
 #![cfg_attr(nightly, feature(const_fn, const_vec_new))]
-#![deny(warnings)]
+#![warn(rust_2018_idioms)]
 #![allow(dead_code)]
-#![cfg(test)]
-
-extern crate const_fn;
 
 use const_fn::const_fn;
 
