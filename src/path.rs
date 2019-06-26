@@ -28,7 +28,7 @@ fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
 }
 
 pub(crate) fn parse_path(input: ParseStream<'_>) -> Result<Path> {
-    if input.peek(Token![dyn]) {
+    if input.peek(Token![dyn ]) {
         return Err(input.error("expected path"));
     }
 
