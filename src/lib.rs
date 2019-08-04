@@ -37,7 +37,6 @@
 #![warn(rust_2018_idioms, unreachable_pub)]
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
-#![warn(clippy::nursery)]
 #![allow(clippy::eval_order_dependence, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
