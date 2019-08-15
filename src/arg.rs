@@ -1,137 +1,99 @@
-use syn::{Lifetime, Token, Type};
+use syn::{Attribute, Lifetime, Token};
 
-use super::Pat;
+use super::PatType;
 
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
-    ///
-    /// # Syntax tree enum
-    ///
-    /// This type is a [syntax tree enum].
-    ///
-    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum FnArg {
-        /// Self captured by reference in a function signature: `&self` or `&mut
-        /// self`.
-        pub SelfRef(ArgSelfRef {
-            pub and_token: Token![&],
-            pub lifetime: Option<Lifetime>,
-            pub mutability: Option<Token![mut]>,
-            pub self_token: Token![self],
-        }),
+        /// The `self` argument of an associated method, whether taken by value
+        /// or by reference.
+        Receiver(Receiver),
 
-        /// Self captured by value in a function signature: `self` or `mut
-        /// self`.
-        pub SelfValue(ArgSelf {
-            pub mutability: Option<Token![mut]>,
-            pub self_token: Token![self],
-        }),
+        /// A function argument accepted by pattern and type.
+        Typed(PatType),
+    }
+}
 
-        /// An explicitly typed pattern captured by a function signature.
-        pub Captured(ArgCaptured {
-            pub pat: Pat,
-            pub colon_token: Token![:],
-            pub ty: Type,
-        }),
-
-        /// A pattern whose type is inferred captured by a function signature.
-        pub Inferred(Pat),
-        /// A type not bound to any pattern in a function signature.
-        pub Ignored(Type),
+ast_struct! {
+    /// The `self` argument of an associated method, whether taken by value
+    /// or by reference.
+    pub struct Receiver {
+        pub attrs: Vec<Attribute>,
+        pub reference: Option<(Token![&], Option<Lifetime>)>,
+        pub mutability: Option<Token![mut]>,
+        pub self_token: Token![self],
     }
 }
 
 mod parsing {
     use syn::{
-        parse::{Parse, ParseStream, Result},
-        Token, Type,
+        parse::{discouraged::Speculative, Parse, ParseStream, Result},
+        Attribute, Token,
     };
 
-    use super::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg};
+    use super::{FnArg, PatType, Receiver};
 
     impl Parse for FnArg {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
-            if input.peek(Token![&]) {
-                let ahead = input.fork();
-                if ahead.call(arg_self_ref).is_ok() && !ahead.peek(Token![:]) {
-                    return input.call(arg_self_ref).map(FnArg::SelfRef);
+            let attrs = input.call(Attribute::parse_outer)?;
+
+            let ahead = input.fork();
+            if let Ok(mut receiver) = ahead.parse::<Receiver>() {
+                if !ahead.peek(Token![:]) {
+                    input.advance_to(&ahead);
+                    receiver.attrs = attrs;
+                    return Ok(FnArg::Receiver(receiver));
                 }
             }
 
-            if input.peek(Token![mut]) || input.peek(Token![self]) {
-                let ahead = input.fork();
-                if ahead.call(arg_self).is_ok() && !ahead.peek(Token![:]) {
-                    return input.call(arg_self).map(FnArg::SelfValue);
-                }
-            }
-
-            let ahead = input.fork();
-            let err = match ahead.call(arg_captured) {
-                Ok(_) => return input.call(arg_captured).map(FnArg::Captured),
-                Err(err) => err,
-            };
-
-            let ahead = input.fork();
-            if ahead.parse::<Type>().is_ok() {
-                return input.parse().map(FnArg::Ignored);
-            }
-
-            Err(err)
+            let mut typed = input.call(fn_arg_typed)?;
+            typed.attrs = attrs;
+            Ok(FnArg::Typed(typed))
         }
     }
 
-    fn arg_self_ref(input: ParseStream<'_>) -> Result<ArgSelfRef> {
-        Ok(ArgSelfRef {
-            and_token: input.parse()?,
-            lifetime: input.parse()?,
-            mutability: input.parse()?,
-            self_token: input.parse()?,
-        })
+    impl Parse for Receiver {
+        fn parse(input: ParseStream<'_>) -> Result<Self> {
+            Ok(Self {
+                attrs: Vec::new(),
+                reference: {
+                    if input.peek(Token![&]) {
+                        Some((input.parse()?, input.parse()?))
+                    } else {
+                        None
+                    }
+                },
+                mutability: input.parse()?,
+                self_token: input.parse()?,
+            })
+        }
     }
 
-    fn arg_self(input: ParseStream<'_>) -> Result<ArgSelf> {
-        Ok(ArgSelf {
-            mutability: input.parse()?,
-            self_token: input.parse()?,
-        })
-    }
-
-    fn arg_captured(input: ParseStream<'_>) -> Result<ArgCaptured> {
-        Ok(ArgCaptured {
+    fn fn_arg_typed(input: ParseStream<'_>) -> Result<PatType> {
+        Ok(PatType {
+            attrs: Vec::new(),
             pat: input.parse()?,
             colon_token: input.parse()?,
-            ty: input.parse()?,
+            ty: Box::new(input.parse()?),
         })
     }
 }
 
 mod printing {
     use proc_macro2::TokenStream;
-    use quote::ToTokens;
+    use quote::{ToTokens, TokenStreamExt};
 
-    use super::{ArgCaptured, ArgSelf, ArgSelfRef};
+    use super::Receiver;
 
-    impl ToTokens for ArgSelfRef {
+    impl ToTokens for Receiver {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.and_token.to_tokens(tokens);
-            self.lifetime.to_tokens(tokens);
+            tokens.append_all(&self.attrs);
+            if let Some((ampersand, lifetime)) = &self.reference {
+                ampersand.to_tokens(tokens);
+                lifetime.to_tokens(tokens);
+            }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ArgSelf {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.mutability.to_tokens(tokens);
-            self.self_token.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for ArgCaptured {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.pat.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
         }
     }
 }

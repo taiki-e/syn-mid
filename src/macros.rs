@@ -1,46 +1,57 @@
 macro_rules! ast_struct {
     (
-        $(#[$attr:meta])*
-        pub struct $name:ident $($rest:tt)*
+        [$($attrs_pub:tt)*]
+        struct $name:ident $($rest:tt)*
     ) => {
-        $(#[$attr])*
         #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub struct $name $($rest)*
+        $($attrs_pub)* struct $name $($rest)*
+    };
+
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_struct!($($t)*));
+    };
+}
+
+macro_rules! ast_enum {
+    (
+        [$($attrs_pub:tt)*]
+        enum $name:ident $($rest:tt)*
+    ) => (
+        #[cfg_attr(feature = "clone-impls", derive(Clone))]
+        $($attrs_pub)* enum $name $($rest)*
+    );
+
+    ($($t:tt)*) => {
+        strip_attrs_pub!(ast_enum!($($t)*));
     };
 }
 
 macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
-        pub enum $name:ident {
+        $pub:ident $enum:ident $name:ident $body:tt
+    ) => {
+        ast_enum!($(#[$enum_attr])* $pub $enum $name $body);
+        ast_enum_of_structs_impl!($pub $enum $name $body);
+    };
+}
+
+macro_rules! ast_enum_of_structs_impl {
+    (
+        $pub:ident $enum:ident $name:ident {
             $(
                 $(#[$variant_attr:meta])*
-                pub $variant:ident $( ($member:ident $($rest:tt)*) )*,
+                $variant:ident $( ($member:ident) )*,
             )*
         }
-
-        $($remaining:tt)*
-    ) => (
-        $(#[$enum_attr])*
-        #[cfg_attr(feature = "clone-impls", derive(Clone))]
-        pub enum $name {
-            $(
-                $(#[$variant_attr])*
-                $variant $( ($member) )*,
-            )*
-        }
+    ) => {
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(enum $enum);
 
         $(
-            maybe_ast_struct! {
-                $(#[$variant_attr])*
-                $(
-                    pub struct $member $($rest)*
-                )*
-            }
-
             $(
                 impl From<$member> for $name {
-                    fn from(e: $member) -> Self {
+                    fn from(e: $member) -> $name {
                         $name::$variant(e)
                     }
                 }
@@ -48,12 +59,11 @@ macro_rules! ast_enum_of_structs {
         )*
 
         generate_to_tokens! {
-            $($remaining)*
             ()
             tokens
-            $name { $($variant $( [$($rest)*] )*,)* }
+            $name { $($variant $($member)*,)* }
         }
-    )
+    };
 }
 
 macro_rules! generate_to_tokens {
@@ -64,16 +74,16 @@ macro_rules! generate_to_tokens {
         );
     };
 
-    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident [$($rest:tt)*], $($next:tt)*}) => {
+    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident $member:ident, $($next:tt)*}) => {
         generate_to_tokens!(
-            ($($arms)* $name::$variant(_e) => ::quote::ToTokens::to_tokens(_e, $tokens),)
+            ($($arms)* $name::$variant(_e) => quote::ToTokens::to_tokens(_e, $tokens),)
             $tokens $name { $($next)* }
         );
     };
 
     (($($arms:tt)*) $tokens:ident $name:ident {}) => {
-        impl ::quote::ToTokens for $name {
-            fn to_tokens(&self, $tokens: &mut ::proc_macro2::TokenStream) {
+        impl quote::ToTokens for $name {
+            fn to_tokens(&self, $tokens: &mut proc_macro2::TokenStream) {
                 match self {
                     $($arms)*
                 }
@@ -82,13 +92,16 @@ macro_rules! generate_to_tokens {
     };
 }
 
-macro_rules! maybe_ast_struct {
-    (
-        $(#[$attr:meta])*
-        $(
-            pub struct $name:ident
-        )*
-    ) => ();
+macro_rules! strip_attrs_pub {
+    ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
+        check_keyword_matches!(pub $pub);
 
-    ($($rest:tt)*) => (ast_struct! { $($rest)* });
+        $mac!([$(#[$m])* $pub] $($t)*);
+    };
+}
+
+macro_rules! check_keyword_matches {
+    (struct struct) => {};
+    (enum enum) => {};
+    (pub pub) => {};
 }

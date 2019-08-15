@@ -8,7 +8,6 @@ use syn::{
 fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
     if input.peek(Token![super])
         || input.peek(Token![self])
-        || input.peek(Token![Self])
         || input.peek(Token![crate])
         || input.peek(Token![extern])
     {
@@ -16,7 +15,12 @@ fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
         return Ok(PathSegment::from(ident));
     }
 
-    let ident = input.parse()?;
+    let ident = if input.peek(Token![Self]) {
+        input.call(Ident::parse_any)?
+    } else {
+        input.parse()?
+    };
+
     if input.peek(Token![::]) && input.peek3(Token![<]) {
         Ok(PathSegment {
             ident,
@@ -28,10 +32,6 @@ fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
 }
 
 pub(crate) fn parse_path(input: ParseStream<'_>) -> Result<Path> {
-    if input.peek(Token![dyn ]) {
-        return Err(input.error("expected path"));
-    }
-
     Ok(Path {
         leading_colon: input.parse()?,
         segments: {
