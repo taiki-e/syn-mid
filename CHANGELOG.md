@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.4.0 - 2019-08-15
+
 * Updated all data structures based on `syn` 1.0.
 
 * Updated `proc-macro2`, `syn`, and `quote` to 1.0.
