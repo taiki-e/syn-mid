@@ -1,4 +1,4 @@
-use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token};
+use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token, Type};
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -10,49 +10,107 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
     pub enum Pat {
-        /// A pattern that matches any value: `_`.
-        pub Wild(PatWild {
-            pub underscore_token: Token![_],
-        }),
-
-        /// A pattern that binds a new variable: `ref mut binding`.
-        pub Ident(PatIdent {
-            pub by_ref: Option<Token![ref]>,
-            pub mutability: Option<Token![mut]>,
-            pub ident: Ident,
-        }),
-
-        /// A struct or struct variant pattern: `Variant { x, y, .. }`.
-        pub Struct(PatStruct {
-            pub path: Path,
-            pub brace_token: token::Brace,
-            pub fields: Punctuated<FieldPat, Token![,]>,
-            pub dot2_token: Option<Token![..]>,
-        }),
-
-        /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
-        pub TupleStruct(PatTupleStruct {
-            pub path: Path,
-            pub pat: PatTuple,
-        }),
+        /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
+        Ident(PatIdent),
 
         /// A path pattern like `Color::Red`.
-        pub Path(PatPath {
-            pub path: Path,
-        }),
+        Path(PatPath),
+
+        /// A reference pattern: `&mut var`.
+        Reference(PatReference),
+
+        /// A struct or struct variant pattern: `Variant { x, y, .. }`.
+        Struct(PatStruct),
 
         /// A tuple pattern: `(a, b)`.
-        pub Tuple(PatTuple {
-            pub paren_token: token::Paren,
-            pub elements: Punctuated<Pat, Token![,]>,
-        }),
+        Tuple(PatTuple),
 
-        /// A reference pattern: `&mut (first, second)`.
-        pub Ref(PatRef {
-            pub and_token: Token![&],
-            pub mutability: Option<Token![mut]>,
-            pub pat: Box<Pat>,
-        }),
+        /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
+        TupleStruct(PatTupleStruct),
+
+        /// A type ascription pattern: `foo: f64`.
+        Type(PatType),
+
+        /// A pattern that matches any value: `_`.
+        Wild(PatWild),
+
+        #[doc(hidden)]
+        __Nonexhaustive,
+    }
+}
+
+ast_struct! {
+    /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
+    pub struct PatIdent {
+        pub attrs: Vec<Attribute>,
+        pub by_ref: Option<Token![ref]>,
+        pub mutability: Option<Token![mut]>,
+        pub ident: Ident,
+    }
+}
+
+ast_struct! {
+    /// A path pattern like `Color::Red`.
+    pub struct PatPath {
+        pub attrs: Vec<Attribute>,
+        pub path: Path,
+    }
+}
+
+ast_struct! {
+    /// A reference pattern: `&mut var`.
+    pub struct PatReference {
+        pub attrs: Vec<Attribute>,
+        pub and_token: Token![&],
+        pub mutability: Option<Token![mut]>,
+        pub pat: Box<Pat>,
+    }
+}
+
+ast_struct! {
+    /// A struct or struct variant pattern: `Variant { x, y, .. }`.
+    pub struct PatStruct {
+        pub attrs: Vec<Attribute>,
+        pub path: Path,
+        pub brace_token: token::Brace,
+        pub fields: Punctuated<FieldPat, Token![,]>,
+        pub dot2_token: Option<Token![..]>,
+    }
+}
+
+ast_struct! {
+    /// A tuple pattern: `(a, b)`.
+    pub struct PatTuple {
+        pub attrs: Vec<Attribute>,
+        pub paren_token: token::Paren,
+        pub elems: Punctuated<Pat, Token![,]>,
+    }
+}
+
+ast_struct! {
+    /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
+    pub struct PatTupleStruct {
+        pub attrs: Vec<Attribute>,
+        pub path: Path,
+        pub pat: PatTuple,
+    }
+}
+
+ast_struct! {
+    /// A type ascription pattern: `foo: f64`.
+    pub struct PatType {
+        pub attrs: Vec<Attribute>,
+        pub pat: Box<Pat>,
+        pub colon_token: Token![:],
+        pub ty: Box<Type>,
+    }
+}
+
+ast_struct! {
+    /// A pattern that matches any value: `_`.
+    pub struct PatWild {
+        pub attrs: Vec<Attribute>,
+        pub underscore_token: Token![_],
     }
 }
 
@@ -82,38 +140,40 @@ mod parsing {
     use crate::path;
 
     use super::{
-        FieldPat, Pat, PatIdent, PatPath, PatRef, PatStruct, PatTuple, PatTupleStruct, PatWild,
+        FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
+        PatWild,
     };
 
     impl Parse for Pat {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(Token![_]) {
-                input.call(pat_wild).map(Pat::Wild)
-            } else if input.peek(Ident)
+            if lookahead.peek(Ident)
                 && ({
                     input.peek2(Token![::])
                         || input.peek2(token::Brace)
                         || input.peek2(token::Paren)
                 })
                 || input.peek(Token![self]) && input.peek2(Token![::])
-                || input.peek(Token![::])
+                || lookahead.peek(Token![::])
+                || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
                 || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
                 pat_path_or_struct(input)
-            } else if input.peek(Token![ref])
-                || input.peek(Token![mut])
+            } else if lookahead.peek(Token![_]) {
+                input.call(pat_wild).map(Pat::Wild)
+            } else if lookahead.peek(Token![ref])
+                || lookahead.peek(Token![mut])
                 || input.peek(Token![self])
                 || input.peek(Ident)
             {
                 input.call(pat_ident).map(Pat::Ident)
+            } else if lookahead.peek(Token![&]) {
+                input.call(pat_reference).map(Pat::Reference)
             } else if lookahead.peek(token::Paren) {
                 input.call(pat_tuple).map(Pat::Tuple)
-            } else if lookahead.peek(Token![&]) {
-                input.call(pat_ref).map(Pat::Ref)
             } else {
                 Err(lookahead.error())
             }
@@ -128,18 +188,23 @@ mod parsing {
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else {
-            Ok(Pat::Path(PatPath { path }))
+            Ok(Pat::Path(PatPath {
+                attrs: Vec::new(),
+                path,
+            }))
         }
     }
 
     fn pat_wild(input: ParseStream<'_>) -> Result<PatWild> {
         Ok(PatWild {
+            attrs: Vec::new(),
             underscore_token: input.parse()?,
         })
     }
 
     fn pat_ident(input: ParseStream<'_>) -> Result<PatIdent> {
         Ok(PatIdent {
+            attrs: Vec::new(),
             by_ref: input.parse()?,
             mutability: input.parse()?,
             ident: input.call(Ident::parse_any)?,
@@ -148,6 +213,7 @@ mod parsing {
 
     fn pat_tuple_struct(input: ParseStream<'_>, path: Path) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
+            attrs: Vec::new(),
             path,
             pat: input.call(pat_tuple)?,
         })
@@ -175,6 +241,7 @@ mod parsing {
         };
 
         Ok(PatStruct {
+            attrs: Vec::new(),
             path,
             brace_token,
             fields,
@@ -205,6 +272,7 @@ mod parsing {
         };
 
         let pat = Pat::Ident(PatIdent {
+            attrs: Vec::new(),
             by_ref,
             mutability,
             ident: ident.clone(),
@@ -222,25 +290,27 @@ mod parsing {
         let content;
         let paren_token = parenthesized!(content in input);
 
-        let mut elements = Punctuated::new();
+        let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value: Pat = content.parse()?;
-            elements.push_value(value);
+            elems.push_value(value);
             if content.is_empty() {
                 break;
             }
             let punct = content.parse()?;
-            elements.push_punct(punct);
+            elems.push_punct(punct);
         }
 
         Ok(PatTuple {
+            attrs: Vec::new(),
             paren_token,
-            elements,
+            elems,
         })
     }
 
-    fn pat_ref(input: ParseStream<'_>) -> Result<PatRef> {
-        Ok(PatRef {
+    fn pat_reference(input: ParseStream<'_>) -> Result<PatReference> {
+        Ok(PatReference {
+            attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
             pat: input.parse()?,
@@ -248,21 +318,21 @@ mod parsing {
     }
 
     fn is_unnamed(member: &Member) -> bool {
-        match *member {
+        match member {
             Member::Named(_) => false,
             Member::Unnamed(_) => true,
         }
     }
-
 }
 
 mod printing {
     use proc_macro2::TokenStream;
-    use quote::ToTokens;
+    use quote::{ToTokens, TokenStreamExt};
     use syn::Token;
 
     use super::{
-        FieldPat, PatIdent, PatPath, PatRef, PatStruct, PatTuple, PatTupleStruct, PatWild,
+        FieldPat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct, PatType,
+        PatWild,
     };
 
     impl ToTokens for PatWild {
@@ -300,6 +370,15 @@ mod printing {
         }
     }
 
+    impl ToTokens for PatType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
+            self.pat.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens)
@@ -309,12 +388,12 @@ mod printing {
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
-                self.elements.to_tokens(tokens);
+                self.elems.to_tokens(tokens);
             });
         }
     }
 
-    impl ToTokens for PatRef {
+    impl ToTokens for PatReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
@@ -324,7 +403,7 @@ mod printing {
 
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            if let Some(ref colon_token) = self.colon_token {
+            if let Some(colon_token) = &self.colon_token {
                 self.member.to_tokens(tokens);
                 colon_token.to_tokens(tokens);
             }

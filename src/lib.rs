@@ -40,6 +40,7 @@
 #![allow(
     clippy::eval_order_dependence,
     clippy::large_enum_variant,
+    clippy::module_name_repetitions,
     clippy::use_self
 )]
 
@@ -76,11 +77,11 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
         pub constness: Option<Token![const]>,
-        pub unsafety: Option<Token![unsafe]>,
         pub asyncness: Option<Token![async]>,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
-        pub ident: Ident,
         pub fn_token: Token![fn],
+        pub ident: Ident,
         pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnArg, Token![,]>,
@@ -110,11 +111,11 @@ mod parsing {
 
     impl Parse for ItemFn {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+            let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let constness: Option<Token![const]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
             let ident: Ident = input.parse()?;
@@ -130,21 +131,21 @@ mod parsing {
             let block = input.parse()?;
 
             Ok(Self {
-                attrs: outer_attrs,
+                attrs,
                 vis,
                 constness,
-                unsafety,
                 asyncness,
+                unsafety,
                 abi,
-                ident,
                 fn_token,
-                paren_token,
-                inputs,
-                output,
+                ident,
                 generics: Generics {
                     where_clause,
                     ..generics
                 },
+                paren_token,
+                inputs,
+                output,
                 block,
             })
         }
@@ -170,8 +171,8 @@ mod printing {
             tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.fn_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);

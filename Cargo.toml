@@ -1,29 +1,23 @@
 [package]
 name = "syn-mid"
-# NB: When modifying, also modify html_root_url in lib.rs
 version = "0.3.0"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
-description = "Providing the features between \"full\" and \"derive\" of syn."
 repository = "https://github.com/taiki-e/syn-mid"
 documentation = "https://docs.rs/syn-mid/"
 readme = "README.md"
 keywords = ["syn", "macros"]
 categories = ["development-tools::procedural-macro-helpers"]
+description = "Providing the features between \"full\" and \"derive\" of syn."
 
 [workspace]
 members = ["examples/const_fn", "examples/const_fn_test"]
 
 [features]
-default = []
 clone-impls = ["syn/clone-impls"]
 
 [dependencies]
-proc-macro2 = "0.4.19"
-quote = "0.6"
-
-[dependencies.syn]
-version = "0.15.22"
-default-features = false
-features = ["parsing", "printing", "derive"]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "1.0", default-features = false, features = ["parsing", "printing", "derive"] }

@@ -5,17 +5,14 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::parse_macro_input;
 use syn_mid::ItemFn;
-
-// These codes copied from https://github.com/taiki-e/const_fn/blob/master/src/lib.rs
 
 /// An attribute for easy generation of a const function with conditional compilations.
 #[proc_macro_attribute]
 pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
     assert!(!args.is_empty(), "requires an argument");
 
-    let mut function: ItemFn = parse_macro_input!(function);
+    let mut function = syn::parse_macro_input!(function as ItemFn);
     let mut const_function = function.clone();
 
     if function.constness.is_some() {
