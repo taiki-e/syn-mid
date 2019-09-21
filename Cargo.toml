@@ -6,10 +6,12 @@ edition = "2018"
 license = "Apache-2.0/MIT"
 repository = "https://github.com/taiki-e/syn-mid"
 documentation = "https://docs.rs/syn-mid/"
-readme = "README.md"
 keywords = ["syn", "macros"]
 categories = ["development-tools::procedural-macro-helpers"]
-description = "Providing the features between \"full\" and \"derive\" of syn."
+readme = "README.md"
+description = """
+Providing the features between \"full\" and \"derive\" of syn.
+"""
 
 [workspace]
 members = ["examples/const_fn", "examples/const_fn_test"]
