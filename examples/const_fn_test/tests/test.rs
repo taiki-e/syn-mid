@@ -1,25 +1,30 @@
-#![cfg_attr(nightly, feature(const_fn, const_vec_new))]
+#![cfg_attr(nightly, feature(const_fn))]
 #![warn(rust_2018_idioms)]
 #![allow(dead_code)]
 
 use const_fn::const_fn;
 
-#[const_fn(nightly)]
-fn const_vec_new<T>() -> Vec<T> {
-    let vec = Vec::new();
-    vec
+struct A<T> {
+    x: T,
+}
+
+impl<T: IntoIterator> A<T> {
+    #[const_fn(nightly)]
+    const fn new(x: T) -> Self {
+        Self { x }
+    }
 }
 
 #[test]
 fn test_stable() {
-    assert_eq!(const_vec_new::<u8>(), Vec::new());
+    assert_eq!(A::new(Vec::<u8>::new()).x, Vec::new());
 }
 
 #[cfg(nightly)]
-const CONST_UNSTABLE: Vec<u8> = const_vec_new();
+const CONST_UNSTABLE: A<Vec<u8>> = A::new(Vec::new());
 
 #[cfg(nightly)]
 #[test]
 fn test_unstable() {
-    assert_eq!(CONST_UNSTABLE, Vec::new());
+    assert_eq!(CONST_UNSTABLE.x, Vec::new());
 }

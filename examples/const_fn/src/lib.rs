@@ -12,14 +12,19 @@ use syn_mid::ItemFn;
 pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
     assert!(!args.is_empty(), "requires an argument");
 
-    let mut function = syn::parse_macro_input!(function as ItemFn);
-    let mut const_function = function.clone();
+    let const_function = syn::parse_macro_input!(function as ItemFn);
 
-    if function.constness.is_some() {
-        function.constness = None;
-    } else {
-        const_function.constness = Some(Default::default());
+    if const_function.constness.is_none() {
+        return syn::Error::new_spanned(
+            const_function.fn_token,
+            "#[const_fn] attribute may only be used on const functions",
+        )
+        .to_compile_error()
+        .into();
     }
+
+    let mut function = const_function.clone();
+    function.constness = None;
 
     let args = TokenStream2::from(args);
     TokenStream::from(quote! {
