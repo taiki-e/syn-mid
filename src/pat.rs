@@ -188,18 +188,12 @@ mod parsing {
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else {
-            Ok(Pat::Path(PatPath {
-                attrs: Vec::new(),
-                path,
-            }))
+            Ok(Pat::Path(PatPath { attrs: Vec::new(), path }))
         }
     }
 
     fn pat_wild(input: ParseStream<'_>) -> Result<PatWild> {
-        Ok(PatWild {
-            attrs: Vec::new(),
-            underscore_token: input.parse()?,
-        })
+        Ok(PatWild { attrs: Vec::new(), underscore_token: input.parse()? })
     }
 
     fn pat_ident(input: ParseStream<'_>) -> Result<PatIdent> {
@@ -212,11 +206,7 @@ mod parsing {
     }
 
     fn pat_tuple_struct(input: ParseStream<'_>, path: Path) -> Result<PatTupleStruct> {
-        Ok(PatTupleStruct {
-            attrs: Vec::new(),
-            path,
-            pat: input.call(pat_tuple)?,
-        })
+        Ok(PatTupleStruct { attrs: Vec::new(), path, pat: input.call(pat_tuple)? })
     }
 
     fn pat_struct(input: ParseStream<'_>, path: Path) -> Result<PatStruct> {
@@ -240,13 +230,7 @@ mod parsing {
             None
         };
 
-        Ok(PatStruct {
-            attrs: Vec::new(),
-            path,
-            brace_token,
-            fields,
-            dot2_token,
-        })
+        Ok(PatStruct { attrs: Vec::new(), path, brace_token, fields, dot2_token })
     }
 
     fn field_pat(input: ParseStream<'_>) -> Result<FieldPat> {
@@ -271,12 +255,8 @@ mod parsing {
             Member::Unnamed(_) => unreachable!(),
         };
 
-        let pat = Pat::Ident(PatIdent {
-            attrs: Vec::new(),
-            by_ref,
-            mutability,
-            ident: ident.clone(),
-        });
+        let pat =
+            Pat::Ident(PatIdent { attrs: Vec::new(), by_ref, mutability, ident: ident.clone() });
 
         Ok(FieldPat {
             member: Member::Named(ident),
@@ -301,11 +281,7 @@ mod parsing {
             elems.push_punct(punct);
         }
 
-        Ok(PatTuple {
-            attrs: Vec::new(),
-            paren_token,
-            elems,
-        })
+        Ok(PatTuple { attrs: Vec::new(), paren_token, elems })
     }
 
     fn pat_reference(input: ParseStream<'_>) -> Result<PatReference> {

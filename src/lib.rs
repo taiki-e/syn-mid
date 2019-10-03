@@ -34,10 +34,7 @@
 #![doc(html_root_url = "https://docs.rs/syn-mid/0.4.0")]
 #![doc(test(
     no_crate_inject,
-    attr(
-        deny(warnings, rust_2018_idioms, single_use_lifetimes),
-        allow(dead_code)
-    )
+    attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
 ))]
 #![forbid(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
@@ -107,10 +104,7 @@ mod parsing {
     impl Parse for Block {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let content;
-            Ok(Self {
-                brace_token: braced!(content in input),
-                stmts: content.parse()?,
-            })
+            Ok(Self { brace_token: braced!(content in input), stmts: content.parse()? })
         }
     }
 
@@ -144,10 +138,7 @@ mod parsing {
                 abi,
                 fn_token,
                 ident,
-                generics: Generics {
-                    where_clause,
-                    ..generics
-                },
+                generics: Generics { where_clause, ..generics },
                 paren_token,
                 inputs,
                 output,

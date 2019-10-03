@@ -15,17 +15,11 @@ fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
         return Ok(PathSegment::from(ident));
     }
 
-    let ident = if input.peek(Token![Self]) {
-        input.call(Ident::parse_any)?
-    } else {
-        input.parse()?
-    };
+    let ident =
+        if input.peek(Token![Self]) { input.call(Ident::parse_any)? } else { input.parse()? };
 
     if input.peek(Token![::]) && input.peek3(Token![<]) {
-        Ok(PathSegment {
-            ident,
-            arguments: PathArguments::AngleBracketed(input.parse()?),
-        })
+        Ok(PathSegment { ident, arguments: PathArguments::AngleBracketed(input.parse()?) })
     } else {
         Ok(PathSegment::from(ident))
     }
