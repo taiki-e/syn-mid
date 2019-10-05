@@ -1,13 +1,10 @@
 # syn-mid
 
-[![ci-badge]][ci-url]
 [![crates-badge]][crates-url]
 [![docs-badge]][docs-url]
 [![license-badge]][license]
 [![rustc-badge]][rustc-url]
 
-[ci-badge]: https://github.com/taiki-e/syn-mid/workflows/ci/badge.svg
-[ci-url]: https://github.com/taiki-e/syn-mid/actions?workflow=ci
 [crates-badge]: https://img.shields.io/crates/v/syn-mid.svg
 [crates-url]: https://crates.io/crates/syn-mid/
 [docs-badge]: https://docs.rs/syn-mid/badge.svg
