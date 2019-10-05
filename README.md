@@ -1,16 +1,19 @@
 # syn-mid
 
-[![Crates.io][crates-version-badge]][crates-url]
-[![Docs.rs][docs-badge]][docs-url]
-[![License][crates-license-badge]][crates-url]
-[![Minimum supported Rust version][rustc-badge]][rustc-url]
+[![ci-badge]][ci-url]
+[![crates-badge]][crates-url]
+[![docs-badge]][docs-url]
+[![license-badge]][license]
+[![rustc-badge]][rustc-url]
 
-[crates-version-badge]: https://img.shields.io/crates/v/syn-mid.svg
-[crates-license-badge]: https://img.shields.io/crates/l/syn-mid.svg
+[ci-badge]: https://github.com/taiki-e/syn-mid/workflows/ci/badge.svg
+[ci-url]: https://github.com/taiki-e/syn-mid/actions?workflow=ci
 [crates-badge]: https://img.shields.io/crates/v/syn-mid.svg
 [crates-url]: https://crates.io/crates/syn-mid/
 [docs-badge]: https://docs.rs/syn-mid/badge.svg
 [docs-url]: https://docs.rs/syn-mid/
+[license-badge]: https://img.shields.io/crates/l/syn-mid.svg
+[license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-1.31+-lightgray.svg
 [rustc-url]: https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html
 
