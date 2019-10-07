@@ -29,7 +29,6 @@
 //! [`syn_mid::ItemFn`]: struct.ItemFn.html
 //! [`syn_mid::Block`]: struct.Block.html
 //! [syn]: https://github.com/dtolnay/syn
-//!
 
 #![doc(html_root_url = "https://docs.rs/syn-mid/0.4.0")]
 #![doc(test(
@@ -55,8 +54,7 @@ mod arg;
 mod pat;
 mod path;
 
-pub use self::arg::*;
-pub use self::pat::*;
+pub use self::{arg::*, pat::*};
 
 use proc_macro2::TokenStream;
 use syn::{
