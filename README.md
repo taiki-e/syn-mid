@@ -6,9 +6,9 @@
 [![rustc-badge]][rustc-url]
 
 [crates-badge]: https://img.shields.io/crates/v/syn-mid.svg
-[crates-url]: https://crates.io/crates/syn-mid/
+[crates-url]: https://crates.io/crates/syn-mid
 [docs-badge]: https://docs.rs/syn-mid/badge.svg
-[docs-url]: https://docs.rs/syn-mid/
+[docs-url]: https://docs.rs/syn-mid
 [license-badge]: https://img.shields.io/crates/l/syn-mid.svg
 [license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-1.31+-lightgray.svg
