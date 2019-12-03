@@ -53,7 +53,8 @@ pub use self::{arg::*, pat::*};
 
 use proc_macro2::TokenStream;
 use syn::{
-    punctuated::Punctuated, token, Abi, Attribute, Generics, Ident, ReturnType, Token, Visibility,
+    punctuated::Punctuated, token, Abi, Attribute, Generics, Ident, ReturnType, Token, Variadic,
+    Visibility,
 };
 
 ast_struct! {
@@ -71,6 +72,15 @@ ast_struct! {
     pub struct ItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub sig: Signature,
+        pub block: Box<Block>,
+    }
+}
+
+ast_struct! {
+    /// A function signature in a trait or implementation: `unsafe fn
+    /// initialize(&self)`.
+    pub struct Signature {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
         pub unsafety: Option<Token![unsafe]>,
@@ -80,8 +90,8 @@ ast_struct! {
         pub generics: Generics,
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnArg, Token![,]>,
+        pub variadic: Option<Variadic>,
         pub output: ReturnType,
-        pub block: Block,
     }
 }
 
@@ -89,10 +99,11 @@ mod parsing {
     use syn::{
         braced, parenthesized,
         parse::{Parse, ParseStream, Result},
-        Abi, Attribute, Generics, Ident, ReturnType, Token, Visibility, WhereClause,
+        parse2, Abi, Attribute, Generics, Ident, ReturnType, Token, Type, Variadic, Visibility,
+        WhereClause,
     };
 
-    use super::{Block, FnArg, ItemFn};
+    use super::{Block, FnArg, ItemFn, PatType, Signature};
 
     impl Parse for Block {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
@@ -116,6 +127,19 @@ mod parsing {
             let content;
             let paren_token = parenthesized!(content in input);
             let inputs = content.parse_terminated(FnArg::parse)?;
+            let variadic = inputs.last().as_ref().and_then(get_variadic);
+
+            #[allow(clippy::trivially_copy_pass_by_ref)]
+            fn get_variadic(input: &&FnArg) -> Option<Variadic> {
+                if let FnArg::Typed(PatType { ty, .. }) = input {
+                    if let Type::Verbatim(tokens) = &**ty {
+                        if let Ok(dots) = parse2(tokens.clone()) {
+                            return Some(Variadic { attrs: Vec::new(), dots });
+                        }
+                    }
+                }
+                None
+            }
 
             let output: ReturnType = input.parse()?;
             let where_clause: Option<WhereClause> = input.parse()?;
@@ -125,17 +149,20 @@ mod parsing {
             Ok(Self {
                 attrs,
                 vis,
-                constness,
-                asyncness,
-                unsafety,
-                abi,
-                fn_token,
-                ident,
-                generics: Generics { where_clause, ..generics },
-                paren_token,
-                inputs,
-                output,
-                block,
+                sig: Signature {
+                    constness,
+                    asyncness,
+                    unsafety,
+                    abi,
+                    fn_token,
+                    ident,
+                    paren_token,
+                    inputs,
+                    output,
+                    variadic,
+                    generics: Generics { where_clause, ..generics },
+                },
+                block: Box::new(block),
             })
         }
     }
@@ -144,8 +171,9 @@ mod parsing {
 mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
+    use syn::{punctuated::Punctuated, Token, Type};
 
-    use super::{Block, ItemFn};
+    use super::{Block, FnArg, ItemFn, Signature};
 
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -155,10 +183,27 @@ mod printing {
         }
     }
 
-    impl ToTokens for ItemFn {
+    fn has_variadic(inputs: &Punctuated<FnArg, Token![,]>) -> bool {
+        let last = match inputs.last() {
+            Some(last) => last,
+            None => return false,
+        };
+
+        let pat = match last {
+            FnArg::Typed(pat) => pat,
+            FnArg::Receiver(_) => return false,
+        };
+
+        let tokens = match pat.ty.as_ref() {
+            Type::Verbatim(tokens) => tokens,
+            _ => return false,
+        };
+
+        tokens.to_string() == "..."
+    }
+
+    impl ToTokens for Signature {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(&self.attrs);
-            self.vis.to_tokens(tokens);
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
@@ -168,9 +213,23 @@ mod printing {
             self.generics.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.inputs.to_tokens(tokens);
+                if self.variadic.is_some() && !has_variadic(&self.inputs) {
+                    if !self.inputs.empty_or_trailing() {
+                        <Token![,]>::default().to_tokens(tokens);
+                    }
+                    self.variadic.to_tokens(tokens);
+                }
             });
             self.output.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for ItemFn {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
+            self.vis.to_tokens(tokens);
+            self.sig.to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.block.stmts.clone());
             });
