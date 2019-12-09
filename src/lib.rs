@@ -30,7 +30,7 @@
 //! [`syn_mid::Block`]: struct.Block.html
 //! [syn]: https://github.com/dtolnay/syn
 
-#![doc(html_root_url = "https://docs.rs/syn-mid/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/syn-mid/0.5.0")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
