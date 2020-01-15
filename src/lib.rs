@@ -38,6 +38,8 @@
 #![forbid(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all)]
+// mem::take requires Rust 1.40
+#![allow(clippy::mem_replace_with_default)]
 #![allow(clippy::eval_order_dependence, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
