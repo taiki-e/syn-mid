@@ -1,5 +1,5 @@
 #![cfg_attr(nightly, feature(const_fn))]
-#![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
 use const_fn::const_fn;
