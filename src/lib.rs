@@ -131,7 +131,6 @@ mod parsing {
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic = inputs.last().as_ref().and_then(get_variadic);
 
-            #[allow(clippy::trivially_copy_pass_by_ref)]
             fn get_variadic(input: &&FnArg) -> Option<Variadic> {
                 if let FnArg::Typed(PatType { ty, .. }) = input {
                     if let Type::Verbatim(tokens) = &**ty {
