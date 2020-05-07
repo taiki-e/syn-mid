@@ -51,7 +51,13 @@ mod arg;
 mod pat;
 mod path;
 
-pub use self::{arg::*, pat::*};
+pub use crate::{
+    arg::{FnArg, Receiver},
+    pat::{
+        FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
+        PatType, PatWild,
+    },
+};
 
 use proc_macro2::TokenStream;
 use syn::{

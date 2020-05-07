@@ -137,12 +137,11 @@ mod parsing {
         token, Ident, Member, Path, Token,
     };
 
-    use crate::path;
-
     use super::{
         FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
         PatWild,
     };
+    use crate::path;
 
     impl Parse for Pat {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
