@@ -26,4 +26,4 @@ clone-impls = ["syn/clone-impls"]
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "1.0.5", default-features = false, features = ["parsing", "printing", "derive"] }
+syn = { version = "1.0.30", default-features = false, features = ["parsing", "printing", "derive"] }

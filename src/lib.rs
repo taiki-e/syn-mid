@@ -120,57 +120,56 @@ mod parsing {
         }
     }
 
+    fn parse_signature(input: ParseStream<'_>) -> Result<Signature> {
+        let constness: Option<Token![const]> = input.parse()?;
+        let asyncness: Option<Token![async]> = input.parse()?;
+        let unsafety: Option<Token![unsafe]> = input.parse()?;
+        let abi: Option<Abi> = input.parse()?;
+        let fn_token: Token![fn] = input.parse()?;
+        let ident: Ident = input.parse()?;
+        let generics: Generics = input.parse()?;
+
+        let content;
+        let paren_token = parenthesized!(content in input);
+        let inputs = content.parse_terminated(FnArg::parse)?;
+        let variadic = inputs.last().as_ref().and_then(get_variadic);
+
+        fn get_variadic(input: &&FnArg) -> Option<Variadic> {
+            if let FnArg::Typed(PatType { ty, .. }) = input {
+                if let Type::Verbatim(tokens) = &**ty {
+                    if let Ok(dots) = parse2(tokens.clone()) {
+                        return Some(Variadic { attrs: Vec::new(), dots });
+                    }
+                }
+            }
+            None
+        }
+
+        let output: ReturnType = input.parse()?;
+        let where_clause: Option<WhereClause> = input.parse()?;
+
+        Ok(Signature {
+            constness,
+            asyncness,
+            unsafety,
+            abi,
+            fn_token,
+            ident,
+            paren_token,
+            inputs,
+            output,
+            variadic,
+            generics: Generics { where_clause, ..generics },
+        })
+    }
+
     impl Parse for ItemFn {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let constness: Option<Token![const]> = input.parse()?;
-            let asyncness: Option<Token![async]> = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let abi: Option<Abi> = input.parse()?;
-            let fn_token: Token![fn] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let generics: Generics = input.parse()?;
-
-            let content;
-            let paren_token = parenthesized!(content in input);
-            let inputs = content.parse_terminated(FnArg::parse)?;
-            let variadic = inputs.last().as_ref().and_then(get_variadic);
-
-            fn get_variadic(input: &&FnArg) -> Option<Variadic> {
-                if let FnArg::Typed(PatType { ty, .. }) = input {
-                    if let Type::Verbatim(tokens) = &**ty {
-                        if let Ok(dots) = parse2(tokens.clone()) {
-                            return Some(Variadic { attrs: Vec::new(), dots });
-                        }
-                    }
-                }
-                None
-            }
-
-            let output: ReturnType = input.parse()?;
-            let where_clause: Option<WhereClause> = input.parse()?;
-
+            let sig = parse_signature(input)?;
             let block = input.parse()?;
-
-            Ok(Self {
-                attrs,
-                vis,
-                sig: Signature {
-                    constness,
-                    asyncness,
-                    unsafety,
-                    abi,
-                    fn_token,
-                    ident,
-                    paren_token,
-                    inputs,
-                    output,
-                    variadic,
-                    generics: Generics { where_clause, ..generics },
-                },
-                block: Box::new(block),
-            })
+            Ok(Self { attrs, vis, sig, block: Box::new(block) })
         }
     }
 }

@@ -6,11 +6,7 @@ use syn::{
 };
 
 fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {
-    if input.peek(Token![super])
-        || input.peek(Token![self])
-        || input.peek(Token![crate])
-        || input.peek(Token![extern])
-    {
+    if input.peek(Token![super]) || input.peek(Token![self]) || input.peek(Token![crate]) {
         let ident = input.call(Ident::parse_any)?;
         return Ok(PathSegment::from(ident));
     }

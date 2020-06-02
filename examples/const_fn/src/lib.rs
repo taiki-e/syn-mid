@@ -15,7 +15,7 @@ use syn_mid::ItemFn;
 pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
     assert!(!args.is_empty(), "requires an argument");
 
-    let const_function = syn::parse_macro_input!(function as ItemFn);
+    let const_function: ItemFn = syn::parse_macro_input!(function);
 
     if const_function.sig.constness.is_none() {
         return Error::new_spanned(
