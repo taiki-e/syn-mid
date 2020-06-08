@@ -19,7 +19,7 @@
 //! Other data structures are the same as data structures of [syn]. These are defined in this crate
 //! because they cannot be used in [syn] without "full" feature.
 //!
-//! ## Optional features
+//! # Optional features
 //!
 //! syn-mid in the default features aims to provide the features between "full"
 //! and "derive" of [syn].
