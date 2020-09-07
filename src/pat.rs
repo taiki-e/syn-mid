@@ -8,7 +8,7 @@ ast_enum_of_structs! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
+    /// [syntax tree enum]: https://docs.rs/syn/1/syn/enum.Expr.html#syntax-tree-enums
     pub enum Pat {
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
