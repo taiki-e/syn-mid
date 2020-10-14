@@ -51,14 +51,12 @@
 #[macro_use]
 mod macros;
 
-mod arg;
 mod func;
 mod pat;
 mod path;
 
 pub use crate::{
-    arg::{FnArg, Receiver},
-    func::{Block, ItemFn, Signature},
+    func::{Block, FnArg, ItemFn, Receiver, Signature},
     pat::{
         FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
         PatType, PatWild,
