@@ -26,8 +26,8 @@
 //!
 //! * **`clone-impls`** — Clone impls for all syntax tree types.
 //!
-//! [`syn_mid::ItemFn`]: struct.ItemFn.html
-//! [`syn_mid::Block`]: struct.Block.html
+//! [`syn_mid::ItemFn`]: ItemFn
+//! [`syn_mid::Block`]: Block
 //! [syn]: https://github.com/dtolnay/syn
 
 #![doc(html_root_url = "https://docs.rs/syn-mid/0.5.0")]
