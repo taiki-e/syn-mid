@@ -24,6 +24,6 @@ members = ["examples/const_fn", "examples/const_fn_test"]
 clone-impls = ["syn/clone-impls"]
 
 [dependencies]
-proc-macro2 = { version = "1.0", default-features = false }
-quote = { version = "1.0", default-features = false }
-syn = { version = "1.0.30", default-features = false, features = ["parsing", "printing", "derive"] }
+proc-macro2 = { version = "1", default-features = false }
+quote = { version = "1", default-features = false }
+syn = { version = "1.0.44", default-features = false, features = ["parsing", "printing", "derive"] }

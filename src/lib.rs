@@ -112,7 +112,6 @@ mod parsing {
         braced, parenthesized,
         parse::{Parse, ParseStream, Result},
         parse2, Abi, Attribute, Generics, Ident, ReturnType, Token, Type, Variadic, Visibility,
-        WhereClause,
     };
 
     use super::{Block, FnArg, ItemFn, PatType, Signature};
@@ -131,7 +130,7 @@ mod parsing {
         let abi: Option<Abi> = input.parse()?;
         let fn_token: Token![fn] = input.parse()?;
         let ident: Ident = input.parse()?;
-        let generics: Generics = input.parse()?;
+        let mut generics: Generics = input.parse()?;
 
         let content;
         let paren_token = parenthesized!(content in input);
@@ -150,7 +149,7 @@ mod parsing {
         }
 
         let output: ReturnType = input.parse()?;
-        let where_clause: Option<WhereClause> = input.parse()?;
+        generics.where_clause = input.parse()?;
 
         Ok(Signature {
             constness,
@@ -163,7 +162,7 @@ mod parsing {
             inputs,
             output,
             variadic,
-            generics: Generics { where_clause, ..generics },
+            generics,
         })
     }
 

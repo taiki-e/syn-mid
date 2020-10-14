@@ -146,14 +146,16 @@ mod parsing {
     impl Parse for Pat {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(Ident)
-                && ({
-                    input.peek2(Token![::])
-                        || input.peek2(token::Brace)
-                        || input.peek2(token::Paren)
-                })
-                || input.peek(Token![self]) && input.peek2(Token![::])
-                || lookahead.peek(Token![::])
+            if {
+                let ahead = input.fork();
+                ahead.parse::<Option<Ident>>()?.is_some()
+                    && (ahead.peek(Token![::])
+                        || ahead.peek(token::Brace)
+                        || ahead.peek(token::Paren))
+            } || {
+                let ahead = input.fork();
+                ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
+            } || lookahead.peek(Token![::])
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
