@@ -1,9 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
-// older compilers require explicit `extern crate`.
-#[allow(unused_extern_crates)]
-extern crate proc_macro;
-
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;

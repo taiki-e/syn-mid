@@ -39,7 +39,7 @@ jobs:
       - if: matrix.rust == '1.31.0'
         run: cargo check --all-features
       - if: matrix.rust != '1.31.0'
-        run: cargo test --all-features
+        run: cargo test --all-features --all
       - if: matrix.rust != '1.31.0'
         run: cargo hack check --all --feature-powerset --no-dev-deps
       - if: matrix.rust == 'nightly'
