@@ -48,7 +48,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * Fixed bugs.
 
-## [0.1.0] - 2019-02-14 - YANKED
+## [0.1.0] - 2019-02-14
+
+**Note: This release has been yanked.**
 
 Initial release
 
