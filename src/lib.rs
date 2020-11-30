@@ -21,9 +21,6 @@
 //!
 //! # Optional features
 //!
-//! syn-mid in the default features aims to provide the features between "full"
-//! and "derive" of [syn].
-//!
 //! * **`clone-impls`** — Clone impls for all syntax tree types.
 //!
 //! [`syn_mid::ItemFn`]: ItemFn
