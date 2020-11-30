@@ -85,6 +85,17 @@ mod parsing {
 
     impl Parse for Signature {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
+            fn get_variadic(input: &&FnArg) -> Option<Variadic> {
+                if let FnArg::Typed(PatType { ty, .. }) = input {
+                    if let Type::Verbatim(tokens) = &**ty {
+                        if let Ok(dots) = parse2(tokens.clone()) {
+                            return Some(Variadic { attrs: Vec::new(), dots });
+                        }
+                    }
+                }
+                None
+            }
+
             let constness: Option<Token![const]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
@@ -97,17 +108,6 @@ mod parsing {
             let paren_token = parenthesized!(content in input);
             let inputs = content.parse_terminated(FnArg::parse)?;
             let variadic = inputs.last().as_ref().and_then(get_variadic);
-
-            fn get_variadic(input: &&FnArg) -> Option<Variadic> {
-                if let FnArg::Typed(PatType { ty, .. }) = input {
-                    if let Type::Verbatim(tokens) = &**ty {
-                        if let Ok(dots) = parse2(tokens.clone()) {
-                            return Some(Variadic { attrs: Vec::new(), dots });
-                        }
-                    }
-                }
-                None
-            }
 
             let output: ReturnType = input.parse()?;
             generics.where_clause = input.parse()?;
