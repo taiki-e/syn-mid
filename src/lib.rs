@@ -16,8 +16,9 @@
 //!   ^     ^
 //!   ```
 //!
-//! Other data structures are the same as data structures of [syn]. These are defined in this crate
-//! because they cannot be used in [syn] without "full" feature.
+//! Other data structures are the same as data structures of [syn]. These are
+//! defined in this crate because they cannot be used in [syn] without "full"
+//! feature.
 //!
 //! # Optional features
 //!

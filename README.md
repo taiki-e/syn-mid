@@ -24,7 +24,9 @@ This crate provides the following two unique data structures.
   ^     ^
   ```
 
-Other data structures are the same as data structures of [syn]. These are defined in this crate because they cannot be used in [syn] without "full" feature.
+Other data structures are the same as data structures of [syn]. These are
+defined in this crate because they cannot be used in [syn] without "full"
+feature.
 
 [syn]: https://github.com/dtolnay/syn
 
@@ -47,6 +49,9 @@ syn-mid = "0.5"
 
 ## License
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
+[MIT license](LICENSE-MIT) at your option.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
