@@ -8,45 +8,45 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [0.5.1] - 2020-10-14
 
-* Implement `Parse` for `Signature`.
+- Implement `Parse` for `Signature`.
 
-* Update parser implementations based on `syn` 1.0.44. This includes some bugfixes.
+- Update parser implementations based on `syn` 1.0.44. This includes some bugfixes.
 
-* Disable default features of `proc-macro2` and `quote`.
+- Disable default features of `proc-macro2` and `quote`.
 
 ## [0.5.0] - 2019-12-09
 
-* [Added `Signature` type.][13]
+- [Added `Signature` type.][13]
 
 [13]: https://github.com/taiki-e/syn-mid/pull/13
 
 ## [0.4.0] - 2019-08-15
 
-* Updated all data structures based on `syn` 1.0.
+- Updated all data structures based on `syn` 1.0.
 
-* Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+- Updated `proc-macro2`, `syn`, and `quote` to 1.0.
 
-* Bumped the minimum required version from Rust 1.30 to Rust 1.31.
+- Bumped the minimum required version from Rust 1.30 to Rust 1.31.
 
 ## [0.3.0] - 2019-02-18
 
-* Removed support for unneeded syntax.
+- Removed support for unneeded syntax.
 
-* Removed unneeded types and fields.
+- Removed unneeded types and fields.
 
-* Implemented `Parse` for `Block`.
+- Implemented `Parse` for `Block`.
 
-* Changed `clone-impls` feature to "disabled by default".
+- Changed `clone-impls` feature to "disabled by default".
 
-* Removed `extra-traits` feature.
+- Removed `extra-traits` feature.
 
-* Bumped the minimum required version from Rust 1.15 to Rust 1.30.
+- Bumped the minimum required version from Rust 1.15 to Rust 1.30.
 
 ## [0.2.0] - 2019-02-15
 
-* Reduced features.
+- Reduced features.
 
-* Fixed bugs.
+- Fixed bugs.
 
 ## [0.1.0] - 2019-02-14
 
@@ -54,7 +54,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.5.1...HEAD
 [0.5.1]: https://github.com/taiki-e/syn-mid/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/taiki-e/syn-mid/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/taiki-e/syn-mid/compare/v0.3.0...v0.4.0
