@@ -58,7 +58,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.5.2...HEAD
 [0.5.2]: https://github.com/taiki-e/syn-mid/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/taiki-e/syn-mid/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/taiki-e/syn-mid/compare/v0.4.0...v0.5.0

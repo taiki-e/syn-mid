@@ -10,14 +10,14 @@ Providing the features between "full" and "derive" of syn.
 
 This crate provides the following two unique data structures.
 
-* `syn_mid::ItemFn` -- A function whose body is not parsed.
+- `syn_mid::ItemFn` -- A function whose body is not parsed.
 
   ```text
   fn process(n: usize) -> Result<()> { ... }
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^     ^
   ```
 
-* `syn_mid::Block` -- A block whose body is not parsed.
+- `syn_mid::Block` -- A block whose body is not parsed.
 
   ```text
   { ... }
@@ -45,7 +45,7 @@ syn-mid = "0.5"
 
 ## Optional features
 
-* **`clone-impls`** — Clone impls for all syntax tree types.
+- **`clone-impls`** — Clone impls for all syntax tree types.
 
 ## License
 
