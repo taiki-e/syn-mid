@@ -8,7 +8,6 @@ repository = "https://github.com/taiki-e/syn-mid"
 documentation = "https://docs.rs/syn-mid"
 keywords = ["syn", "macros"]
 categories = ["development-tools::procedural-macro-helpers"]
-readme = "README.md"
 exclude = ["/.github", "/scripts"]
 description = """
 Providing the features between \"full\" and \"derive\" of syn.
