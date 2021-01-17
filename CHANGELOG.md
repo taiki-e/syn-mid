@@ -28,9 +28,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.5.0] - 2019-12-09
 
-- [Added `Signature` type.][13]
-
-[13]: https://github.com/taiki-e/syn-mid/pull/13
+- [Added `Signature` type.](https://github.com/taiki-e/syn-mid/pull/13)
 
 ## [0.4.0] - 2019-08-15
 
