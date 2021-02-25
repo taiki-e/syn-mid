@@ -23,7 +23,7 @@ members = ["examples/const_fn", "examples/const_fn_test"]
 [features]
 clone-impls = ["syn/clone-impls"]
 
-# NB: proc-macro2, quote, and syn are public dependencies.
+# Note: proc-macro2, quote, and syn are public dependencies.
 [dependencies]
 proc-macro2 = { version = "1", default-features = false }
 quote = { version = "1", default-features = false }
