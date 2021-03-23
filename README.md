@@ -4,7 +4,7 @@
 [![docs.rs](https://img.shields.io/badge/docs.rs-syn--mid-blue?style=flat-square)](https://docs.rs/syn-mid)
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)](#license)
 [![rustc](https://img.shields.io/badge/rustc-1.31+-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![build status](https://img.shields.io/github/workflow/status/taiki-e/syn-mid/CI/master?style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
+[![build status](https://img.shields.io/github/workflow/status/taiki-e/syn-mid/CI/main?style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
 
 Providing the features between "full" and "derive" of syn.
 
