@@ -1,4 +1,4 @@
-#![cfg_attr(nightly, feature(const_fn))]
+#![cfg_attr(nightly, feature(const_fn_trait_bound))]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
