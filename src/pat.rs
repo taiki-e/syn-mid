@@ -354,7 +354,7 @@ mod printing {
 
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.path.to_tokens(tokens)
+            self.path.to_tokens(tokens);
         }
     }
 
