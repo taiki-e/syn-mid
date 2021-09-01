@@ -2,14 +2,14 @@
 //!
 //! This crate provides the following two unique data structures.
 //!
-//! * [`syn_mid::ItemFn`] -- A function whose body is not parsed.
+//! - [`syn_mid::ItemFn`] -- A function whose body is not parsed.
 //!
 //!   ```text
 //!   fn process(n: usize) -> Result<()> { ... }
 //!   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^     ^
 //!   ```
 //!
-//! * [`syn_mid::Block`] -- A block whose body is not parsed.
+//! - [`syn_mid::Block`] -- A block whose body is not parsed.
 //!
 //!   ```text
 //!   { ... }
@@ -22,7 +22,7 @@
 //!
 //! # Optional features
 //!
-//! * **`clone-impls`** — Clone impls for all syntax tree types.
+//! - **`clone-impls`** — Clone impls for all syntax tree types.
 //!
 //! [`syn_mid::ItemFn`]: ItemFn
 //! [`syn_mid::Block`]: Block
