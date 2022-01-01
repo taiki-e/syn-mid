@@ -43,6 +43,7 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
+      - uses: taiki-e/install-action@cargo-hack
       - run: cargo test --workspace --all-features
       - run: cargo hack build --workspace --ignore-private --feature-powerset --no-dev-deps
 
