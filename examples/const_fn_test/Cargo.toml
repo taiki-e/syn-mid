@@ -1,8 +1,0 @@
-[package]
-name = "const_fn_test"
-version = "0.0.0"
-edition = "2018"
-publish = false
-
-[dev-dependencies]
-const_fn = { path = "../const_fn" }
