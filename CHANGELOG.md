@@ -60,7 +60,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.1.0] - 2019-02-14
 
-**Note: This release has been yanked.**
+**Note:** This release has been yanked.
 
 Initial release
 

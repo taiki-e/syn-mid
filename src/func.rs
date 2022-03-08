@@ -85,6 +85,7 @@ mod parsing {
 
     impl Parse for Signature {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
+            #[allow(clippy::trivially_copy_pass_by_ref)]
             fn get_variadic(input: &&FnArg) -> Option<Variadic> {
                 if let FnArg::Typed(PatType { ty, .. }) = input {
                     if let Type::Verbatim(tokens) = &**ty {
@@ -210,7 +211,7 @@ mod printing {
             FnArg::Receiver(_) => return false,
         };
 
-        let tokens = match pat.ty.as_ref() {
+        let tokens = match &*pat.ty {
             Type::Verbatim(tokens) => tokens,
             _ => return false,
         };

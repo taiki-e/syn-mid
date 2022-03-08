@@ -327,7 +327,7 @@ mod printing {
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
-                // NOTE: We need a comma before the dot2 token if it is present.
+                // Note: We need a comma before the dot2 token if it is present.
                 if !self.fields.empty_or_trailing() && self.dot2_token.is_some() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
