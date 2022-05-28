@@ -38,7 +38,7 @@
 #![forbid(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::default_trait_access, clippy::wildcard_imports)]
-#![allow(clippy::eval_order_dependence, clippy::large_enum_variant)]
+#![allow(clippy::mixed_read_write_in_expression, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
