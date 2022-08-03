@@ -43,7 +43,7 @@
     clippy::alloc_instead_of_core,
     // clippy::exhaustive_enums, // TODO
     // clippy::exhaustive_structs, // TODO
-    clippy::std_instead_of_alloc,
+    // clippy::std_instead_of_alloc, // alloc requires Rust 1.36
     clippy::std_instead_of_core,
 )]
 #![allow(clippy::mixed_read_write_in_expression, clippy::large_enum_variant)]
