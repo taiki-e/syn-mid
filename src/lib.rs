@@ -37,7 +37,15 @@
 ))]
 #![forbid(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::pedantic)]
+#![warn(
+    clippy::pedantic,
+    // lints for public library
+    clippy::alloc_instead_of_core,
+    // clippy::exhaustive_enums, // TODO
+    // clippy::exhaustive_structs, // TODO
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+)]
 #![allow(clippy::mixed_read_write_in_expression, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
