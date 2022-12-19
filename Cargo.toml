@@ -19,6 +19,9 @@ targets = ["x86_64-unknown-linux-gnu"]
 [workspace]
 members = ["examples/const_fn"]
 
+[lib]
+doc-scrape-examples = false
+
 [features]
 clone-impls = ["syn/clone-impls"]
 
