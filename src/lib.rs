@@ -1,32 +1,34 @@
-//! Providing the features between "full" and "derive" of syn.
-//!
-//! This crate provides the following two unique data structures.
-//!
-//! - [`syn_mid::ItemFn`] -- A function whose body is not parsed.
-//!
-//!   ```text
-//!   fn process(n: usize) -> Result<()> { ... }
-//!   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^     ^
-//!   ```
-//!
-//! - [`syn_mid::Block`] -- A block whose body is not parsed.
-//!
-//!   ```text
-//!   { ... }
-//!   ^     ^
-//!   ```
-//!
-//! Other data structures are the same as data structures of [syn]. These are
-//! defined in this crate because they cannot be used in [syn] without "full"
-//! feature.
-//!
-//! # Optional features
-//!
-//! - **`clone-impls`** — Clone impls for all syntax tree types.
-//!
-//! [`syn_mid::ItemFn`]: ItemFn
-//! [`syn_mid::Block`]: Block
-//! [syn]: https://github.com/dtolnay/syn
+/*!
+Providing the features between "full" and "derive" of syn.
+
+This crate provides the following two unique data structures.
+
+- [`syn_mid::ItemFn`] -- A function whose body is not parsed.
+
+  ```text
+  fn process(n: usize) -> Result<()> { ... }
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^     ^
+  ```
+
+- [`syn_mid::Block`] -- A block whose body is not parsed.
+
+  ```text
+  { ... }
+  ^     ^
+  ```
+
+Other data structures are the same as data structures of [syn]. These are
+defined in this crate because they cannot be used in [syn] without "full"
+feature.
+
+# Optional features
+
+- **`clone-impls`** — Clone impls for all syntax tree types.
+
+[`syn_mid::ItemFn`]: ItemFn
+[`syn_mid::Block`]: Block
+[syn]: https://github.com/dtolnay/syn
+*/
 
 #![doc(test(
     no_crate_inject,
