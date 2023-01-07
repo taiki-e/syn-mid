@@ -28,8 +28,6 @@ Other data structures are the same as data structures of [syn]. These are
 defined in this crate because they cannot be used in [syn] without "full"
 feature.
 
-[syn]: https://github.com/dtolnay/syn
-
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -46,6 +44,8 @@ syn-mid = "0.5"
 ## Optional features
 
 - **`clone-impls`** — Clone impls for all syntax tree types.
+
+[syn]: https://github.com/dtolnay/syn
 
 ## License
 
