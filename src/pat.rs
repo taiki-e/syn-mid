@@ -35,7 +35,7 @@ ast_enum_of_structs! {
         Wild(PatWild),
 
         #[doc(hidden)]
-        __Nonexhaustive,
+        __NonExhaustive,
     }
 }
 
