@@ -22,6 +22,7 @@ pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
         .into();
     }
 
+    #[allow(clippy::redundant_clone)] // https://github.com/rust-lang/rust-clippy/issues/10545
     let mut function = const_function.clone();
     function.sig.constness = None;
 
