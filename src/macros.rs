@@ -7,8 +7,8 @@ macro_rules! ast_struct {
         $($attrs_pub)* struct $name $($rest)*
     };
 
-    ($($t:tt)*) => {
-        strip_attrs_pub!(ast_struct!($($t)*));
+    ($($tt:tt)*) => {
+        strip_attrs_pub!(ast_struct!($($tt)*));
     };
 }
 
@@ -21,8 +21,8 @@ macro_rules! ast_enum {
         $($attrs_pub)* enum $name $($rest)*
     );
 
-    ($($t:tt)*) => {
-        strip_attrs_pub!(ast_enum!($($t)*));
+    ($($tt:tt)*) => {
+        strip_attrs_pub!(ast_enum!($($tt)*));
     };
 }
 
@@ -93,10 +93,10 @@ macro_rules! generate_to_tokens {
 }
 
 macro_rules! strip_attrs_pub {
-    ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
+    ($mac:ident!($(#[$m:meta])* $pub:ident $($tt:tt)*)) => {
         check_keyword_matches!(pub $pub);
 
-        $mac!([$(#[$m])* $pub] $($t)*);
+        $mac!([$(#[$m])* $pub] $($tt)*);
     };
 }
 
