@@ -2,7 +2,7 @@
 name = "syn-mid"
 version = "0.5.3"
 edition = "2018"
-rust-version = "1.31"
+rust-version = "1.56"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/syn-mid"
 keywords = ["syn", "macros"]
@@ -17,6 +17,7 @@ all-features = true
 targets = ["x86_64-unknown-linux-gnu"]
 
 [workspace]
+resolver = "2"
 members = ["examples/const_fn"]
 
 [lib]

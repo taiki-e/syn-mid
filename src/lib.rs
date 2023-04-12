@@ -31,7 +31,7 @@ Add this to your `Cargo.toml`:
 syn-mid = "0.5"
 ```
 
-*Compiler support: requires rustc 1.31+*
+*Compiler support: requires rustc 1.56+*
 
 [**Examples**](https://github.com/taiki-e/syn-mid/tree/HEAD/examples)
 
