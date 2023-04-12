@@ -6,18 +6,19 @@
 [![rustc](https://img.shields.io/badge/rustc-1.31+-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![build status](https://img.shields.io/github/actions/workflow/status/taiki-e/syn-mid/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
 
+<!-- tidy:crate-doc:start -->
 Providing the features between "full" and "derive" of syn.
 
 This crate provides the following two unique data structures.
 
-- `syn_mid::ItemFn` -- A function whose body is not parsed.
+- [`syn_mid::ItemFn`] -- A function whose body is not parsed.
 
   ```text
   fn process(n: usize) -> Result<()> { ... }
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^     ^
   ```
 
-- `syn_mid::Block` -- A block whose body is not parsed.
+- [`syn_mid::Block`] -- A block whose body is not parsed.
 
   ```text
   { ... }
@@ -39,13 +40,18 @@ syn-mid = "0.5"
 
 *Compiler support: requires rustc 1.31+*
 
-[**Examples**](examples)
+[**Examples**](https://github.com/taiki-e/syn-mid/tree/HEAD/examples)
 
 ## Optional features
 
 - **`clone-impls`** — Clone impls for all syntax tree types.
 
 [syn]: https://github.com/dtolnay/syn
+
+<!-- tidy:crate-doc:end -->
+
+[`syn_mid::Block`]: https://docs.rs/syn-mid/latest/syn_mid/struct.Block.html
+[`syn_mid::ItemFn`]: https://docs.rs/syn-mid/latest/syn_mid/struct.ItemFn.html
 
 ## License
 

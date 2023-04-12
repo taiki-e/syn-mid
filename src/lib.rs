@@ -1,4 +1,5 @@
 /*!
+<!-- tidy:crate-doc:start -->
 Providing the features between "full" and "derive" of syn.
 
 This crate provides the following two unique data structures.
@@ -21,13 +22,26 @@ Other data structures are the same as data structures of [syn]. These are
 defined in this crate because they cannot be used in [syn] without "full"
 feature.
 
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+syn-mid = "0.5"
+```
+
+*Compiler support: requires rustc 1.31+*
+
+[**Examples**](https://github.com/taiki-e/syn-mid/tree/HEAD/examples)
+
 ## Optional features
 
 - **`clone-impls`** — Clone impls for all syntax tree types.
 
-[`syn_mid::ItemFn`]: ItemFn
-[`syn_mid::Block`]: Block
 [syn]: https://github.com/dtolnay/syn
+
+<!-- tidy:crate-doc:end -->
 */
 
 #![doc(test(
@@ -51,6 +65,9 @@ feature.
 #![allow(clippy::mixed_read_write_in_expression, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
+
+#[cfg(doc)]
+extern crate self as syn_mid;
 
 #[macro_use]
 mod macros;
