@@ -62,7 +62,6 @@ syn-mid = "0.5"
     // clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
-#![allow(clippy::mixed_read_write_in_expression, clippy::large_enum_variant)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
