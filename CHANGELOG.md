@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update minimal version of `proc-macro2` to 1.0.60.
+
 ## [0.5.3] - 2021-01-05
 
 - Exclude unneeded files from crates.io.
