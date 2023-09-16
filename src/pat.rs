@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token, Type};
 
 ast_enum_of_structs! {
