@@ -54,13 +54,19 @@ syn-mid = "0.5"
     )
 ))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(
+    rust_2018_idioms,
+    single_use_lifetimes,
+    unreachable_pub,
     clippy::pedantic,
-    // lints for public library
+    // Lints that may help when writing public library.
+    // missing_debug_implementations,
+    // missing_docs,
     clippy::alloc_instead_of_core,
     // clippy::exhaustive_enums, // TODO
     // clippy::exhaustive_structs, // TODO
+    clippy::impl_trait_in_params,
+    // clippy::missing_inline_in_public_items,
     // clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
