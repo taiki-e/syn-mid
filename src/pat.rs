@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// Based on https://github.com/dtolnay/syn/blob/2.0.37/src/item.rs.
+
 use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token, Type};
+
+use super::PatPath;
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
     /// various other places.
-    ///
-    /// # Syntax tree enum
-    ///
-    /// This type is a [syntax tree enum].
-    ///
-    /// [syntax tree enum]: https://docs.rs/syn/1/syn/enum.Expr.html#syntax-tree-enums
     #[non_exhaustive]
     pub enum Pat {
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
@@ -50,14 +48,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A path pattern like `Color::Red`.
-    pub struct PatPath {
-        pub attrs: Vec<Attribute>,
-        pub path: Path,
-    }
-}
-
-ast_struct! {
     /// A reference pattern: `&mut var`.
     pub struct PatReference {
         pub attrs: Vec<Attribute>,
@@ -68,13 +58,21 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// The dots in a tuple pattern: `[0, 1, ..]`.
+    pub struct PatRest {
+        pub attrs: Vec<Attribute>,
+        pub dot2_token: Token![..],
+    }
+}
+
+ast_struct! {
     /// A struct or struct variant pattern: `Variant { x, y, .. }`.
     pub struct PatStruct {
         pub attrs: Vec<Attribute>,
         pub path: Path,
         pub brace_token: token::Brace,
         pub fields: Punctuated<FieldPat, Token![,]>,
-        pub dot2_token: Option<Token![..]>,
+        pub rest: Option<PatRest>,
     }
 }
 
@@ -92,7 +90,8 @@ ast_struct! {
     pub struct PatTupleStruct {
         pub attrs: Vec<Attribute>,
         pub path: Path,
-        pub pat: PatTuple,
+        pub paren_token: token::Paren,
+        pub elems: Punctuated<Pat, Token![,]>,
     }
 }
 
@@ -132,34 +131,32 @@ mod parsing {
         braced,
         ext::IdentExt,
         parenthesized,
-        parse::{Parse, ParseStream, Result},
+        parse::{ParseStream, Result},
         punctuated::Punctuated,
-        token, Attribute, Ident, Member, Path, Token,
+        token, Attribute, ExprPath, Ident, Member, Path, Token,
     };
 
     use super::{
-        FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
+        FieldPat, Pat, PatIdent, PatReference, PatRest, PatStruct, PatTuple, PatTupleStruct,
         PatWild,
     };
     use crate::path;
 
-    impl Parse for Pat {
-        fn parse(input: ParseStream<'_>) -> Result<Self> {
+    impl Pat {
+        /// Parse a pattern that does _not_ involve `|` at the top level.
+        pub fn parse_single(input: ParseStream<'_>) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if {
-                let ahead = input.fork();
-                ahead.parse::<Option<Ident>>()?.is_some()
-                    && (ahead.peek(Token![::])
-                        || ahead.peek(token::Brace)
-                        || ahead.peek(token::Paren))
-            } || {
-                let ahead = input.fork();
-                ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
-            } || lookahead.peek(Token![::])
+            if lookahead.peek(Ident)
+                && (input.peek2(Token![::])
+                    || input.peek2(Token![!])
+                    || input.peek2(token::Brace)
+                    || input.peek2(token::Paren)
+                    || input.peek2(Token![..]))
+                || input.peek(Token![self]) && input.peek2(Token![::])
+                || lookahead.peek(Token![::])
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
-                || input.peek(Token![extern])
                 || input.peek(Token![crate])
             {
                 pat_path_or_struct(input)
@@ -174,7 +171,7 @@ mod parsing {
             } else if lookahead.peek(Token![&]) {
                 input.call(pat_reference).map(Pat::Reference)
             } else if lookahead.peek(token::Paren) {
-                input.call(pat_tuple).map(Pat::Tuple)
+                input.call(pat_paren_or_tuple)
             } else {
                 Err(lookahead.error())
             }
@@ -189,7 +186,7 @@ mod parsing {
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, path).map(Pat::TupleStruct)
         } else {
-            Ok(Pat::Path(PatPath { attrs: Vec::new(), path }))
+            Ok(Pat::Path(ExprPath { attrs: Vec::new(), qself: None, path }))
         }
     }
 
@@ -207,7 +204,21 @@ mod parsing {
     }
 
     fn pat_tuple_struct(input: ParseStream<'_>, path: Path) -> Result<PatTupleStruct> {
-        Ok(PatTupleStruct { attrs: Vec::new(), path, pat: input.call(pat_tuple)? })
+        let content;
+        let paren_token = parenthesized!(content in input);
+
+        let mut elems = Punctuated::new();
+        while !content.is_empty() {
+            let value = Pat::parse_single(&content)?;
+            elems.push_value(value);
+            if content.is_empty() {
+                break;
+            }
+            let punct = content.parse()?;
+            elems.push_punct(punct);
+        }
+
+        Ok(PatTupleStruct { attrs: Vec::new(), path, paren_token, elems })
     }
 
     fn pat_struct(input: ParseStream<'_>, path: Path) -> Result<PatStruct> {
@@ -215,8 +226,15 @@ mod parsing {
         let brace_token = braced!(content in input);
 
         let mut fields = Punctuated::new();
-        while !content.is_empty() && !content.peek(Token![..]) {
-            let value = content.call(field_pat)?;
+        let mut rest = None;
+        while !content.is_empty() {
+            let attrs = content.call(Attribute::parse_outer)?;
+            if content.peek(Token![..]) {
+                rest = Some(PatRest { attrs, dot2_token: content.parse()? });
+                break;
+            }
+            let mut value = content.call(field_pat)?;
+            value.attrs = attrs;
             fields.push_value(value);
             if content.is_empty() {
                 break;
@@ -225,30 +243,28 @@ mod parsing {
             fields.push_punct(punct);
         }
 
-        let dot2_token = if fields.empty_or_trailing() && content.peek(Token![..]) {
-            Some(content.parse()?)
-        } else {
-            None
-        };
-
-        Ok(PatStruct { attrs: Vec::new(), path, brace_token, fields, dot2_token })
+        Ok(PatStruct { attrs: Vec::new(), path, brace_token, fields, rest })
     }
 
     fn field_pat(input: ParseStream<'_>) -> Result<FieldPat> {
-        let attrs = input.call(Attribute::parse_outer)?;
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
-        let member: Member = input.parse()?;
+
+        let member = if boxed.is_some() || by_ref.is_some() || mutability.is_some() {
+            input.parse().map(Member::Named)
+        } else {
+            input.parse()
+        }?;
 
         if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
             || is_unnamed(&member)
         {
             return Ok(FieldPat {
-                attrs,
+                attrs: Vec::new(),
                 member,
-                colon_token: input.parse()?,
-                pat: input.parse()?,
+                colon_token: Some(input.parse()?),
+                pat: Box::new(Pat::parse_single(input)?),
             });
         }
 
@@ -260,25 +276,31 @@ mod parsing {
         let pat =
             Pat::Ident(PatIdent { attrs: Vec::new(), by_ref, mutability, ident: ident.clone() });
 
-        Ok(FieldPat { attrs, member: Member::Named(ident), colon_token: None, pat: Box::new(pat) })
+        Ok(FieldPat {
+            attrs: Vec::new(),
+            member: Member::Named(ident),
+            colon_token: None,
+            pat: Box::new(pat),
+        })
     }
 
-    fn pat_tuple(input: ParseStream<'_>) -> Result<PatTuple> {
+    fn pat_paren_or_tuple(input: ParseStream<'_>) -> Result<Pat> {
         let content;
         let paren_token = parenthesized!(content in input);
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value: Pat = content.parse()?;
-            elems.push_value(value);
+            let value = Pat::parse_single(&content)?;
             if content.is_empty() {
+                elems.push_value(value);
                 break;
             }
+            elems.push_value(value);
             let punct = content.parse()?;
             elems.push_punct(punct);
         }
 
-        Ok(PatTuple { attrs: Vec::new(), paren_token, elems })
+        Ok(Pat::Tuple(PatTuple { attrs: Vec::new(), paren_token, elems }))
     }
 
     fn pat_reference(input: ParseStream<'_>) -> Result<PatReference> {
@@ -286,7 +308,7 @@ mod parsing {
             attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
-            pat: input.parse()?,
+            pat: Box::new(Pat::parse_single(input)?),
         })
     }
 
@@ -304,42 +326,66 @@ mod printing {
     use syn::Token;
 
     use super::{
-        FieldPat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct, PatType,
+        FieldPat, PatIdent, PatReference, PatRest, PatStruct, PatTuple, PatTupleStruct, PatType,
         PatWild,
     };
 
-    impl ToTokens for PatWild {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.underscore_token.to_tokens(tokens);
-        }
-    }
-
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
             self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
         }
     }
 
+    impl ToTokens for PatReference {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
+            self.and_token.to_tokens(tokens);
+            self.mutability.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for PatRest {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
+            self.dot2_token.to_tokens(tokens);
+        }
+    }
+
     impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 // Note: We need a comma before the dot2 token if it is present.
-                if !self.fields.empty_or_trailing() && self.dot2_token.is_some() {
+                if !self.fields.empty_or_trailing() && self.rest.is_some() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
-                self.dot2_token.to_tokens(tokens);
+                self.rest.to_tokens(tokens);
+            });
+        }
+    }
+
+    impl ToTokens for PatTuple {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
+            self.paren_token.surround(tokens, |tokens| {
+                self.elems.to_tokens(tokens);
             });
         }
     }
 
     impl ToTokens for PatTupleStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
             self.path.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.elems.to_tokens(tokens);
+            });
         }
     }
 
@@ -352,30 +398,16 @@ mod printing {
         }
     }
 
-    impl ToTokens for PatPath {
+    impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.path.to_tokens(tokens);
-        }
-    }
-
-    impl ToTokens for PatTuple {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.paren_token.surround(tokens, |tokens| {
-                self.elems.to_tokens(tokens);
-            });
-        }
-    }
-
-    impl ToTokens for PatReference {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.and_token.to_tokens(tokens);
-            self.mutability.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
+            tokens.append_all(&self.attrs);
+            self.underscore_token.to_tokens(tokens);
         }
     }
 
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(&self.attrs);
             if let Some(colon_token) = &self.colon_token {
                 self.member.to_tokens(tokens);
                 colon_token.to_tokens(tokens);
