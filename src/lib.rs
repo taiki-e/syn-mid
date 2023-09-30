@@ -70,6 +70,7 @@ syn-mid = "0.5"
     // clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
+#![allow(clippy::missing_errors_doc, clippy::module_name_repetitions)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
@@ -83,10 +84,13 @@ mod func;
 mod pat;
 mod path;
 
+#[doc(no_inline)]
+pub use syn::ExprPath as PatPath;
+
 pub use crate::{
-    func::{Block, FnArg, ItemFn, Receiver, Signature},
+    func::{Block, FnArg, ItemFn, Receiver, Signature, Variadic},
     pat::{
-        FieldPat, Pat, PatIdent, PatPath, PatReference, PatStruct, PatTuple, PatTupleStruct,
+        FieldPat, Pat, PatIdent, PatReference, PatRest, PatStruct, PatTuple, PatTupleStruct,
         PatType, PatWild,
     },
 };

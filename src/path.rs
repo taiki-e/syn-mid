@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// Based on https://github.com/dtolnay/syn/blob/2.0.37/src/path.rs.
+
 use syn::{
     ext::IdentExt,
     parse::{ParseStream, Result},

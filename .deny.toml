@@ -15,7 +15,6 @@ multiple-versions = "warn"
 wildcards = "allow" # https://github.com/EmbarkStudios/cargo-deny/issues/488
 build.allow-build-scripts = [
     { name = "proc-macro2" },
-    { name = "syn" }, # TODO: update to 2.0
 ]
 
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
