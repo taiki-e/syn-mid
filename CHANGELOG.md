@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update to syn 2.0. ([#26](https://github.com/taiki-e/syn-mid/pull/26))
+
 ## [0.5.4] - 2023-06-29
 
 - Increase the minimum supported Rust version from Rust 1.31 to Rust 1.56.
@@ -34,7 +36,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.5.0] - 2019-12-09
 
-- [Added `Signature` type.](https://github.com/taiki-e/syn-mid/pull/13)
+- Added `Signature` type. ([#13](https://github.com/taiki-e/syn-mid/pull/13))
 
 ## [0.4.0] - 2019-08-15
 
