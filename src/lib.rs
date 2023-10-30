@@ -55,10 +55,6 @@ syn-mid = "0.5"
 ))]
 #![forbid(unsafe_code)]
 #![warn(
-    rust_2018_idioms,
-    single_use_lifetimes,
-    unreachable_pub,
-    clippy::pedantic,
     // Lints that may help when writing public library.
     // missing_debug_implementations,
     // missing_docs,
@@ -70,7 +66,6 @@ syn-mid = "0.5"
     // clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
-#![allow(clippy::missing_errors_doc, clippy::module_name_repetitions)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 

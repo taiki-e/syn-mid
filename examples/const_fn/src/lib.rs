@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![warn(rust_2018_idioms, single_use_lifetimes)]
-
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::Error;
 use syn_mid::ItemFn;
@@ -11,7 +9,11 @@ use syn_mid::ItemFn;
 /// An attribute for easy generation of a const function with conditional compilations.
 #[proc_macro_attribute]
 pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
-    assert!(!args.is_empty(), "requires an argument");
+    if args.is_empty() {
+        return Error::new(Span::call_site(), "#[const_fn] attribute requires an argument")
+            .to_compile_error()
+            .into();
+    }
 
     let const_function: ItemFn = syn::parse_macro_input!(function);
 
@@ -24,7 +26,6 @@ pub fn const_fn(args: TokenStream, function: TokenStream) -> TokenStream {
         .into();
     }
 
-    #[allow(clippy::redundant_clone)] // https://github.com/rust-lang/rust-clippy/issues/10545
     let mut function = const_function.clone();
     function.sig.constness = None;
 

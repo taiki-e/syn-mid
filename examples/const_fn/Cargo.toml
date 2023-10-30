@@ -12,3 +12,6 @@ proc-macro2 = "1"
 quote = "1"
 syn = "2"
 syn-mid = { path = "../..", features = ["clone-impls"] }
+
+[lints]
+workspace = true
