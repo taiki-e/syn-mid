@@ -181,7 +181,7 @@ mod parsing {
             return Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
                 attrs,
                 pat: Box::new(Pat::Wild(PatWild {
-                    attrs: Vec::new(),
+                    attrs: vec![],
                     underscore_token: Token![_](span),
                 })),
                 colon_token: Token![:](span),
@@ -242,7 +242,7 @@ mod parsing {
                 ty
             };
             Ok(Self {
-                attrs: Vec::new(),
+                attrs: vec![],
                 reference,
                 mutability,
                 self_token,
