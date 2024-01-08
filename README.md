@@ -3,8 +3,8 @@
 [![crates.io](https://img.shields.io/crates/v/syn-mid?style=flat-square&logo=rust)](https://crates.io/crates/syn-mid)
 [![docs.rs](https://img.shields.io/badge/docs.rs-syn--mid-blue?style=flat-square&logo=docs.rs)](https://docs.rs/syn-mid)
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)](#license)
-[![rustc](https://img.shields.io/badge/rustc-1.56+-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![build status](https://img.shields.io/github/actions/workflow/status/taiki-e/syn-mid/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
+[![rust version](https://img.shields.io/badge/rustc-1.56+-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
+[![github actions](https://img.shields.io/github/actions/workflow/status/taiki-e/syn-mid/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
 
 <!-- tidy:crate-doc:start -->
 Providing the features between "full" and "derive" of syn.
