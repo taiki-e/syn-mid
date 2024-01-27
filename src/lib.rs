@@ -30,7 +30,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-syn-mid = "0.5"
+syn-mid = "0.6"
 ```
 
 *Compiler support: requires rustc 1.56+*
