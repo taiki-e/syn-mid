@@ -56,6 +56,7 @@ syn-mid = "0.6"
 #![forbid(unsafe_code)]
 #![warn(
     // Lints that may help when writing public library.
+    // missing_debug_implementations,
     // missing_docs,
     clippy::alloc_instead_of_core,
     // clippy::exhaustive_enums, // TODO
@@ -65,7 +66,6 @@ syn-mid = "0.6"
     // clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
-#![allow(missing_debug_implementations)]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
