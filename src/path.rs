@@ -3,7 +3,7 @@
 // Based on https://github.com/dtolnay/syn/blob/2.0.37/src/path.rs.
 
 use syn::{
-    ext::IdentExt,
+    ext::IdentExt as _,
     parse::{ParseStream, Result},
     punctuated::Punctuated,
     Ident, Path, PathArguments, PathSegment, Token,

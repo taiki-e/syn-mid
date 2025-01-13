@@ -129,7 +129,7 @@ ast_struct! {
 mod parsing {
     use syn::{
         braced,
-        ext::IdentExt,
+        ext::IdentExt as _,
         parenthesized,
         parse::{ParseStream, Result},
         punctuated::Punctuated,
@@ -321,7 +321,7 @@ mod parsing {
 
 mod printing {
     use proc_macro2::TokenStream;
-    use quote::{ToTokens, TokenStreamExt};
+    use quote::{ToTokens, TokenStreamExt as _};
     use syn::Token;
 
     use super::{

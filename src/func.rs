@@ -86,7 +86,7 @@ ast_struct! {
 mod parsing {
     use syn::{
         braced, parenthesized,
-        parse::{discouraged::Speculative, Parse, ParseStream, Result},
+        parse::{discouraged::Speculative as _, Parse, ParseStream, Result},
         punctuated::Punctuated,
         Abi, Attribute, Error, Generics, Ident, Lifetime, Path, ReturnType, Token, Type, TypePath,
         TypeReference, Visibility,
@@ -313,7 +313,7 @@ mod parsing {
 
 mod printing {
     use proc_macro2::TokenStream;
-    use quote::{ToTokens, TokenStreamExt};
+    use quote::{ToTokens, TokenStreamExt as _};
     use syn::{Token, Type};
 
     use super::{Block, ItemFn, Receiver, Signature, Variadic};
