@@ -2,7 +2,7 @@
 name = "syn-mid"
 version = "0.6.0" #publish:version
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.56" # For syn
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/syn-mid"
 keywords = ["syn", "macros"]
