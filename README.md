@@ -6,7 +6,8 @@
 [![msrv](https://img.shields.io/badge/msrv-1.56-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![github actions](https://img.shields.io/github/actions/workflow/status/taiki-e/syn-mid/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/syn-mid/actions)
 
-<!-- tidy:crate-doc:start -->
+<!-- tidy:sync-markdown-to-rustdoc:start:src/lib.rs -->
+
 Providing the features between "full" and "derive" of syn.
 
 This crate provides the following two unique data structures.
@@ -46,7 +47,7 @@ syn-mid = "0.6"
 
 [syn]: https://github.com/dtolnay/syn
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 
 [`syn_mid::Block`]: https://docs.rs/syn-mid/latest/syn_mid/struct.Block.html
 [`syn_mid::ItemFn`]: https://docs.rs/syn-mid/latest/syn_mid/struct.ItemFn.html
