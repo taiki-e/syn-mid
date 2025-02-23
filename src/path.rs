@@ -3,10 +3,10 @@
 // Based on https://github.com/dtolnay/syn/blob/2.0.37/src/path.rs.
 
 use syn::{
+    Ident, Path, PathArguments, PathSegment, Token,
     ext::IdentExt as _,
     parse::{ParseStream, Result},
     punctuated::Punctuated,
-    Ident, Path, PathArguments, PathSegment, Token,
 };
 
 fn parse_path_segment(input: ParseStream<'_>) -> Result<PathSegment> {

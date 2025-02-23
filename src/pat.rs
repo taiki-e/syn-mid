@@ -2,7 +2,7 @@
 
 // Based on https://github.com/dtolnay/syn/blob/2.0.37/src/item.rs.
 
-use syn::{punctuated::Punctuated, token, Attribute, Ident, Member, Path, Token, Type};
+use syn::{Attribute, Ident, Member, Path, Token, Type, punctuated::Punctuated, token};
 
 use super::PatPath;
 
@@ -128,12 +128,12 @@ ast_struct! {
 
 mod parsing {
     use syn::{
-        braced,
+        Attribute, ExprPath, Ident, Member, Path, Token, braced,
         ext::IdentExt as _,
         parenthesized,
         parse::{ParseStream, Result},
         punctuated::Punctuated,
-        token, Attribute, ExprPath, Ident, Member, Path, Token,
+        token,
     };
 
     use super::{
