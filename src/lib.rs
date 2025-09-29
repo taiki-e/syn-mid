@@ -83,7 +83,7 @@ mod path;
 #[doc(no_inline)]
 pub use syn::ExprPath as PatPath;
 
-pub use crate::{
+pub use self::{
     func::{Block, FnArg, ItemFn, Receiver, Signature, Variadic},
     pat::{
         FieldPat, Pat, PatIdent, PatReference, PatRest, PatStruct, PatTuple, PatTupleStruct,
