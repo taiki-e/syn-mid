@@ -64,7 +64,7 @@ syn-mid = "0.6"
     // clippy::exhaustive_structs, // TODO
     clippy::impl_trait_in_params,
     // clippy::missing_inline_in_public_items,
-    // clippy::std_instead_of_alloc,
+    clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
 
