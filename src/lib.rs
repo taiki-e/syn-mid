@@ -47,6 +47,7 @@ syn-mid = "0.6"
 <!-- tidy:sync-markdown-to-rustdoc:end -->
 */
 
+#![no_std]
 #![doc(test(
     no_crate_inject,
     attr(allow(
@@ -72,8 +73,10 @@ syn-mid = "0.6"
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
 
+extern crate alloc;
 #[cfg(doc)]
 extern crate self as syn_mid;
+extern crate std;
 
 #[macro_use]
 mod macros;

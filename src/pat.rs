@@ -2,6 +2,8 @@
 
 // Based on https://github.com/dtolnay/syn/blob/2.0.37/src/item.rs.
 
+use alloc::{boxed::Box, vec::Vec};
+
 use syn::{Attribute, Ident, Member, Path, Token, Type, punctuated::Punctuated, token};
 
 use super::PatPath;
@@ -127,6 +129,8 @@ ast_struct! {
 }
 
 mod parsing {
+    use alloc::{boxed::Box, vec};
+
     use syn::{
         Attribute, ExprPath, Ident, Member, Path, Token, braced,
         ext::IdentExt as _,

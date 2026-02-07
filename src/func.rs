@@ -2,6 +2,8 @@
 
 // Based on https://github.com/dtolnay/syn/blob/2.0.37/src/item.rs.
 
+use alloc::{boxed::Box, vec::Vec};
+
 use proc_macro2::TokenStream;
 use syn::{
     Abi, Attribute, Generics, Ident, Lifetime, ReturnType, Token, Type, Visibility,
@@ -84,6 +86,8 @@ ast_struct! {
 }
 
 mod parsing {
+    use alloc::{boxed::Box, vec, vec::Vec};
+
     use syn::{
         Abi, Attribute, Error, Generics, Ident, Lifetime, Path, ReturnType, Token, Type, TypePath,
         TypeReference, Visibility, braced, parenthesized,
