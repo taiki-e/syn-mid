@@ -66,9 +66,9 @@ syn-mid = "0.6"
     // clippy::exhaustive_enums, // TODO
     // clippy::exhaustive_structs, // TODO
     clippy::impl_trait_in_params,
-    // clippy::missing_inline_in_public_items,
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
+    // clippy::missing_inline_in_public_items,
 )]
 
 // Many of the code contained in this crate are copies from https://github.com/dtolnay/syn.
