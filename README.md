@@ -43,7 +43,7 @@ syn-mid = "0.6"
 
 ## Optional features
 
-- **`clone-impls`** — Clone impls for all syntax tree types.
+- **`clone-impls`** - Clone impls for all syntax tree types.
 
 [syn]: https://github.com/dtolnay/syn
 
