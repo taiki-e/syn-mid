@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update to syn 3.0. ([#27](https://github.com/taiki-e/syn-mid/pull/27))
+
 ## [0.6.1] - 2026-02-27
 
 - Enable [release immutability](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
