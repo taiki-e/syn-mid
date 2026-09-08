@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-08
+
 - Update to syn 3.0. ([#27](https://github.com/taiki-e/syn-mid/pull/27))
 
 ## [0.6.1] - 2026-02-27
@@ -82,7 +84,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/taiki-e/syn-mid/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/taiki-e/syn-mid/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/taiki-e/syn-mid/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/taiki-e/syn-mid/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/taiki-e/syn-mid/compare/v0.5.3...v0.5.4

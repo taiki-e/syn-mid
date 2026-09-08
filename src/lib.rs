@@ -33,7 +33,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-syn-mid = "0.6"
+syn-mid = "0.7"
 ```
 
 [**Examples**](https://github.com/taiki-e/syn-mid/tree/HEAD/examples)
