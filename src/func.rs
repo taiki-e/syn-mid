@@ -231,11 +231,13 @@ mod parsing {
                 input.parse()?
             } else {
                 let mut ty = Type::Path(TypePath {
+                    attrs: vec![],
                     qself: None,
                     path: Path::from(Ident::new("Self", self_token.span)),
                 });
                 if let Some((ampersand, lifetime)) = reference.as_ref() {
                     ty = Type::Reference(TypeReference {
+                        attrs: vec![],
                         and_token: Token![&](ampersand.span),
                         lifetime: lifetime.clone(),
                         mutability: mutability.as_ref().map(|m| Token![mut](m.span)),
